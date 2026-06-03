@@ -42,18 +42,18 @@ const SellerDashboardPage = () => {
       <div className="grid gap-6 xl:grid-cols-2">
         <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
           <h2 className="font-bold text-slate-950">Monthly Sales</h2>
-          <div className="mt-4 h-72">
-            {monthlySales.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={monthlySales}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="month" />
-                  <YAxis />
-                  <Tooltip formatter={(value) => formatPrice(value)} />
-                  <Bar dataKey="sales" fill="#2563eb" radius={[8, 8, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            ) : <p className="text-sm text-slate-500">No sales data yet.</p>}
+          <div className="mt-4 flex h-72 items-end gap-3 rounded-xl bg-slate-50 p-4">
+            {monthlySales.length > 0 ? monthlySales.map((item) => {
+              const maxSales = Math.max(...monthlySales.map((entry) => Number(entry.sales || 0)), 1);
+              const height = Math.max((Number(item.sales || 0) / maxSales) * 100, 8);
+              return (
+                <div key={item.month} className="flex h-full flex-1 flex-col items-center justify-end gap-2">
+                  <div className="text-xs font-semibold text-slate-600">{formatPrice(item.sales)}</div>
+                  <div className="w-full rounded-t-lg bg-primary-600" style={{ height: `${height}%` }} title={`${item.month}: ${formatPrice(item.sales)}`} />
+                  <div className="text-xs text-slate-500">{item.month}</div>
+                </div>
+              );
+            }) : <p className="self-center text-sm text-slate-500">No sales data yet.</p>}
           </div>
         </section>
         <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
