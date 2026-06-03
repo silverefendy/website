@@ -1,16 +1,20 @@
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
 const path = require('path');
 const appConfig = require('./config/app');
 const authRoutes = require('./routes/authRoutes');
 const { successResponse, errorResponse } = require('./helpers/responseHelper');
 const { toPublicError } = require('./helpers/errorHelper');
+const sanitizeMiddleware = require('./middleware/sanitizeMiddleware');
+const cookieMiddleware = require('./middleware/cookieMiddleware');
 
 const app = express();
 
 const corsOptions = {
   origin(origin, callback) {
-    if (!origin || appConfig.allowedOrigins.includes(origin)) {
+    const allowedOrigins = appConfig.allowedOrigins || [];
+    if (!origin || allowedOrigins.includes(origin)) {
       return callback(null, true);
     }
 
@@ -19,11 +23,18 @@ const corsOptions = {
     return callback(error);
   },
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 };
 
+app.set('trust proxy', 1);
+app.disable('x-powered-by');
+app.use(helmet());
 app.use(cors(corsOptions));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: process.env.JSON_BODY_LIMIT || '1mb' }));
+app.use(express.urlencoded({ extended: true, limit: process.env.URLENCODED_BODY_LIMIT || '1mb' }));
+app.use(cookieMiddleware);
+app.use(sanitizeMiddleware);
 
 const uploadDirectory = path.resolve(process.cwd(), appConfig.uploadDir || process.env.UPLOAD_DIR || 'uploads/');
 app.use('/uploads', express.static(uploadDirectory));

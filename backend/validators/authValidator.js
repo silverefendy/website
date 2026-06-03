@@ -25,6 +25,10 @@ const updateProfileSchema = Joi.object({
   postal_code: Joi.string().trim().max(20).allow('', null),
 });
 
+const refreshTokenSchema = Joi.object({
+  refresh_token: Joi.string().allow('', null),
+});
+
 const changePasswordSchema = Joi.object({
   current_password: Joi.string().required(),
   new_password: Joi.string().min(8).max(255).required(),
@@ -37,5 +41,6 @@ module.exports = {
   registerSchema,
   loginSchema,
   updateProfileSchema,
+  refreshTokenSchema,
   changePasswordSchema,
 };

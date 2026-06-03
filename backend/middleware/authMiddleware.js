@@ -1,4 +1,4 @@
-const { verifyToken } = require('../helpers/jwtHelper');
+const { verifyAccessToken } = require('../helpers/jwtHelper');
 const { errorResponse } = require('../helpers/responseHelper');
 
 const authMiddleware = (req, res, next) => {
@@ -15,7 +15,7 @@ const authMiddleware = (req, res, next) => {
   }
 
   try {
-    const decoded = verifyToken(token);
+    const decoded = verifyAccessToken(token);
 
     if (!decoded.id || !decoded.email || !decoded.role_id) {
       return errorResponse(res, 'Unauthorized', 401);

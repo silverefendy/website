@@ -5,7 +5,7 @@ import App from './App.jsx';
 import useAuthStore from './stores/authStore';
 import './index.css';
 
-if (localStorage.getItem('token')) {
+if (localStorage.getItem('refresh_token') || sessionStorage.getItem('access_token') || localStorage.getItem('token')) {
   useAuthStore.getState().fetchMe().catch(() => {});
 }
 

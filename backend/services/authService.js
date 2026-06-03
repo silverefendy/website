@@ -1,12 +1,19 @@
 const bcrypt = require('bcrypt');
 const appConfig = require('../config/app');
-const { generateToken } = require('../helpers/jwtHelper');
+const {
+  generateAccessToken,
+  generateRefreshToken,
+  verifyRefreshToken,
+  hashToken,
+  getRefreshTokenExpiryDate,
+} = require('../helpers/jwtHelper');
 const { AppError } = require('../helpers/errorHelper');
 const { normalizeEmail, normalizeNullableText, slugify } = require('../helpers/stringHelper');
 const databaseRepository = require('../repositories/databaseRepository');
 const roleRepository = require('../repositories/roleRepository');
 const userRepository = require('../repositories/userRepository');
 const storeRepository = require('../repositories/storeRepository');
+const refreshTokenRepository = require('../repositories/refreshTokenRepository');
 
 const ROLE_IDS = {
   seller: 2,
@@ -19,6 +26,26 @@ const buildTokenPayload = (user, storeId = null) => ({
   role_id: user.role_id,
   ...(storeId ? { store_id: storeId } : {}),
 });
+
+const buildTokenPair = (user, storeId = null) => {
+  const payload = buildTokenPayload(user, storeId);
+  const accessToken = generateAccessToken(payload);
+  return {
+    token: accessToken,
+    accessToken,
+    refreshToken: generateRefreshToken(payload),
+  };
+};
+
+const persistRefreshToken = async (connection, { userId, refreshToken, userAgent, ipAddress }) => {
+  await refreshTokenRepository.create(connection, {
+    user_id: userId,
+    token_hash: hashToken(refreshToken),
+    expires_at: getRefreshTokenExpiryDate(),
+    user_agent: userAgent,
+    ip_address: ipAddress,
+  });
+};
 
 const buildUploadPath = (file) => {
   if (!file) {
@@ -39,7 +66,7 @@ const attachStoreIfSeller = async (user) => {
   return { ...user, store };
 };
 
-const register = async (payload) => {
+const register = async (payload, metadata = {}) => {
   const email = normalizeEmail(payload.email);
   const existingUser = await userRepository.findIdByEmail(email);
 
@@ -94,11 +121,21 @@ const register = async (payload) => {
     return { user, store };
   });
 
-  const token = generateToken(buildTokenPayload(result.user, result.store?.id));
-  return { token, user: { ...result.user, store: result.store } };
+  const tokens = buildTokenPair(result.user, result.store?.id);
+
+  await databaseRepository.withTransaction(async (connection) => {
+    await persistRefreshToken(connection, {
+      userId: result.user.id,
+      refreshToken: tokens.refreshToken,
+      userAgent: metadata.userAgent,
+      ipAddress: metadata.ipAddress,
+    });
+  });
+
+  return { ...tokens, user: { ...result.user, store: result.store } };
 };
 
-const login = async (payload) => {
+const login = async (payload, metadata = {}) => {
   const email = normalizeEmail(payload.email);
   const user = await userRepository.findByEmail(email);
 
@@ -113,10 +150,74 @@ const login = async (payload) => {
   }
 
   const store = user.role_id === ROLE_IDS.seller ? await storeRepository.findByUserId(user.id) : null;
-  const token = generateToken(buildTokenPayload(user, store?.id));
+  const tokens = buildTokenPair(user, store?.id);
   const { password, ...safeUser } = user;
 
-  return { token, user: { ...safeUser, store } };
+  await databaseRepository.withTransaction(async (connection) => {
+    await persistRefreshToken(connection, {
+      userId: user.id,
+      refreshToken: tokens.refreshToken,
+      userAgent: metadata.userAgent,
+      ipAddress: metadata.ipAddress,
+    });
+  });
+
+  return { ...tokens, user: { ...safeUser, store } };
+};
+
+
+const refresh = async ({ refreshToken, metadata = {} }) => {
+  if (!refreshToken) {
+    throw new AppError('Refresh token is required.', 401);
+  }
+
+  try {
+    verifyRefreshToken(refreshToken);
+  } catch (error) {
+    throw new AppError('Invalid refresh token.', 401);
+  }
+
+  const tokenHash = hashToken(refreshToken);
+  const storedToken = await refreshTokenRepository.findActiveByHash(tokenHash);
+
+  if (!storedToken || !storedToken.is_active) {
+    throw new AppError('Invalid refresh token.', 401);
+  }
+
+  const user = await userRepository.findPublicById(storedToken.user_id);
+  if (!user || !user.is_active) {
+    throw new AppError('Invalid refresh token.', 401);
+  }
+
+  const store = user.role_id === ROLE_IDS.seller ? await storeRepository.findByUserId(user.id) : null;
+  const tokens = buildTokenPair(user, store?.id);
+
+  await databaseRepository.withTransaction(async (connection) => {
+    await refreshTokenRepository.revokeByHash(connection, tokenHash);
+    await persistRefreshToken(connection, {
+      userId: user.id,
+      refreshToken: tokens.refreshToken,
+      userAgent: metadata.userAgent,
+      ipAddress: metadata.ipAddress,
+    });
+  });
+
+  return { ...tokens, user: { ...user, store } };
+};
+
+const logout = async ({ userId, refreshToken }) => {
+  await databaseRepository.withTransaction(async (connection) => {
+    if (refreshToken) {
+      await refreshTokenRepository.revokeByHash(connection, hashToken(refreshToken));
+      return;
+    }
+
+    if (userId) {
+      await refreshTokenRepository.revokeAllForUser(connection, userId);
+    }
+  });
+
+  return null;
 };
 
 const getMe = async (userId) => {
@@ -210,5 +311,7 @@ module.exports = {
   login,
   getMe,
   updateProfile,
+  refresh,
+  logout,
   changePassword,
 };
