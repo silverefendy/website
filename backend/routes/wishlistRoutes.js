@@ -1,0 +1,10 @@
+const express = require('express');
+const authMiddleware = require('../middleware/authMiddleware');
+const { isCustomer } = require('../middleware/roleMiddleware');
+const { listWishlist, addWishlist, removeWishlist } = require('../controllers/wishlistController');
+const router = express.Router();
+router.use(authMiddleware, isCustomer);
+router.get('/', listWishlist);
+router.post('/:productId', addWishlist);
+router.delete('/:productId', removeWishlist);
+module.exports = router;

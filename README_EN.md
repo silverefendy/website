@@ -66,7 +66,3 @@ npm run dev
 - Indonesian installation guide: `INSTALLATION_GUIDE_ID.md`
 - English HTML docs: `docs/en/index.html`
 - Indonesian HTML docs: `docs/id/index.html`
-
-
-## Indonesian Documentation
-For Indonesian readers, open `README_ID.md` and `docs/id/index.html`.

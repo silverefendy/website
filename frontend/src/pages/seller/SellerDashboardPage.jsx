@@ -28,13 +28,44 @@ const SellerDashboardPage = () => {
   if (isLoading) return <LoadingSpinner />;
 
   const stats = data.stats || {};
+  const monthlySales = data.monthly_sales || [];
+  const topProducts = data.top_selling_products || [];
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold text-slate-950">Seller Dashboard</h1>
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {[['Total Products', stats.total_products || 0], ['Total Orders', stats.total_orders || 0], ['Pending Orders', stats.pending_orders || 0], ['Total Revenue', formatPrice(stats.total_revenue || 0)]].map(([label, value]) => (
+        {[['Total Products', stats.total_products || 0], ['Total Orders', stats.total_orders || 0], ['Low Stock', stats.low_stock_products || 0], ['Total Sales', formatPrice(stats.total_sales || stats.total_revenue || 0)]].map(([label, value]) => (
           <div key={label} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"><p className="text-sm text-slate-500">{label}</p><p className="mt-2 text-2xl font-bold text-slate-950">{value}</p></div>
         ))}
+      </div>
+      <div className="grid gap-6 xl:grid-cols-2">
+        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <h2 className="font-bold text-slate-950">Monthly Sales</h2>
+          <div className="mt-4 flex h-72 items-end gap-3 rounded-xl bg-slate-50 p-4">
+            {monthlySales.length > 0 ? monthlySales.map((item) => {
+              const maxSales = Math.max(...monthlySales.map((entry) => Number(entry.sales || 0)), 1);
+              const height = Math.max((Number(item.sales || 0) / maxSales) * 100, 8);
+              return (
+                <div key={item.month} className="flex h-full flex-1 flex-col items-center justify-end gap-2">
+                  <div className="text-xs font-semibold text-slate-600">{formatPrice(item.sales)}</div>
+                  <div className="w-full rounded-t-lg bg-primary-600" style={{ height: `${height}%` }} title={`${item.month}: ${formatPrice(item.sales)}`} />
+                  <div className="text-xs text-slate-500">{item.month}</div>
+                </div>
+              );
+            }) : <p className="self-center text-sm text-slate-500">No sales data yet.</p>}
+          </div>
+        </section>
+        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <h2 className="font-bold text-slate-950">Top Selling Products</h2>
+          <div className="mt-4 space-y-3">
+            {topProducts.length > 0 ? topProducts.map((product) => (
+              <div key={`${product.product_id}-${product.name}`} className="rounded-xl bg-slate-50 p-3">
+                <div className="flex justify-between gap-3 text-sm"><span className="font-semibold text-slate-900">{product.name}</span><span>{product.quantity_sold} sold</span></div>
+                <p className="mt-1 text-sm font-bold text-primary-700">{formatPrice(product.sales)}</p>
+              </div>
+            )) : <p className="text-sm text-slate-500">No sales yet.</p>}
+          </div>
+        </section>
       </div>
       <section className="rounded-2xl border border-slate-200 bg-white shadow-sm">
         <div className="border-b border-slate-100 p-5"><h2 className="font-bold text-slate-950">Recent Orders</h2></div>
