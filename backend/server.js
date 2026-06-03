@@ -4,6 +4,7 @@ const path = require('path');
 const appConfig = require('./config/app');
 const authRoutes = require('./routes/authRoutes');
 const { successResponse, errorResponse } = require('./helpers/responseHelper');
+const { toPublicError } = require('./helpers/errorHelper');
 
 const app = express();
 
@@ -38,9 +39,10 @@ app.use('/api', (req, res) => {
 });
 
 app.use((err, req, res, next) => {
-  const statusCode = err.statusCode || err.status || 500;
-  const message = statusCode === 500 ? 'Internal server error.' : err.message;
-  const errors = process.env.NODE_ENV === 'development' ? err.stack : null;
+  const publicError = toPublicError(err);
+  const statusCode = publicError.statusCode;
+  const message = statusCode === 500 ? 'Internal server error.' : publicError.message;
+  const errors = process.env.NODE_ENV === 'development' ? publicError.errors || err.stack : publicError.errors;
 
   return errorResponse(res, message, statusCode, errors);
 });
