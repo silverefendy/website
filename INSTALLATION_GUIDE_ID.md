@@ -1,29 +1,29 @@
-# Installation Guide
+# Panduan Instalasi
 
-## Requirements
-- Git 2.40 or newer.
-- Node.js 20 LTS recommended.
-- npm 10 or newer recommended.
-- MySQL 8.0 or compatible MariaDB installation.
-- 2 GB RAM for development; 4 GB or more for production-like testing.
+## Kebutuhan Sistem
+- Git 2.40 atau lebih baru.
+- Node.js 20 LTS direkomendasikan.
+- npm 10 atau lebih baru direkomendasikan.
+- MySQL 8.0 atau MariaDB yang kompatibel.
+- RAM 2 GB untuk development; 4 GB atau lebih untuk pengujian mendekati production.
 
-## Windows Installation
-### Install Git
-Download Git from `https://git-scm.com/download/win`. Verify:
+## Instalasi Windows
+### Instal Git
+Unduh Git dari `https://git-scm.com/download/win`. Verifikasi:
 ```powershell
 git --version
 ```
-A valid output looks like `git version 2.x.x.windows.x`.
+Output yang benar berbentuk `git version 2.x.x.windows.x`.
 
-### Install Node.js
-Download Node.js LTS from `https://nodejs.org/`. Verify:
+### Instal Node.js
+Unduh Node.js LTS dari `https://nodejs.org/`. Verifikasi:
 ```powershell
 node -v
 npm -v
 ```
 
-### Install MySQL
-Install MySQL Community Server and optionally MySQL Workbench. Create the database and user:
+### Instal MySQL
+Instal MySQL Community Server dan opsional MySQL Workbench. Buat database dan user:
 ```sql
 CREATE DATABASE marketplace CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 CREATE USER 'marketplace_user'@'localhost' IDENTIFIED BY 'StrongPassword123!';
@@ -31,8 +31,8 @@ GRANT ALL PRIVILEGES ON marketplace.* TO 'marketplace_user'@'localhost';
 FLUSH PRIVILEGES;
 ```
 
-## Ubuntu Installation
-Supported versions: Ubuntu 22.04 and 24.04.
+## Instalasi Ubuntu
+Versi yang didukung: Ubuntu 22.04 dan 24.04.
 ```bash
 sudo apt update
 sudo apt upgrade -y
@@ -43,7 +43,7 @@ node -v
 npm -v
 ```
 
-Create database:
+Buat database:
 ```bash
 sudo mysql
 ```
@@ -55,7 +55,7 @@ FLUSH PRIVILEGES;
 EXIT;
 ```
 
-## Debian Installation
+## Instalasi Debian
 ```bash
 sudo apt update
 sudo apt upgrade -y
@@ -63,9 +63,9 @@ sudo apt install -y curl ca-certificates gnupg git build-essential default-mysql
 curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
 sudo apt install -y nodejs
 ```
-Use the same MySQL commands as Ubuntu.
+Gunakan perintah MySQL yang sama seperti Ubuntu.
 
-## Clone and Install
+## Clone dan Instal Dependency
 ```bash
 git clone <repository-url>
 cd website
@@ -75,8 +75,8 @@ cd ../frontend
 npm install
 ```
 
-## Environment Setup
-Backend `.env`:
+## Konfigurasi Environment
+File `backend/.env`:
 ```env
 NODE_ENV=development
 PORT=5000
@@ -85,7 +85,7 @@ DB_PORT=3306
 DB_USER=marketplace_user
 DB_PASSWORD=StrongPassword123!
 DB_NAME=marketplace
-JWT_SECRET=replace-with-a-long-random-secret
+JWT_SECRET=ganti-dengan-secret-panjang-dan-acak
 JWT_ACCESS_EXPIRES_IN=15m
 JWT_REFRESH_EXPIRES_IN=7d
 JWT_REFRESH_TTL_DAYS=7
@@ -95,7 +95,7 @@ MAX_FILE_SIZE=2097152
 WHATSAPP_NUMBER=6281234567890
 ```
 
-Frontend `.env`:
+File `frontend/.env`:
 ```env
 VITE_API_URL=http://localhost:5000
 VITE_SITE_NAME=Marketplace
@@ -106,23 +106,23 @@ VITE_SUPPORT_EMAIL=support@example.com
 VITE_WHATSAPP_NUMBER=6281234567890
 ```
 
-## Database Import
+## Import Database
 ```bash
 mysql -u marketplace_user -p marketplace < schema.sql
 mysql -u marketplace_user -p marketplace < seed.sql
 ```
 
-## Verification
-Start backend:
+## Verifikasi
+Jalankan backend:
 ```bash
 cd backend
 npm run dev
 ```
-Open `http://localhost:5000/api/health`.
+Buka `http://localhost:5000/api/health`.
 
-Start frontend:
+Jalankan frontend:
 ```bash
 cd frontend
 npm run dev
 ```
-Open `http://localhost:5173`.
+Buka `http://localhost:5173`.
