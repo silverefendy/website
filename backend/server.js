@@ -4,6 +4,12 @@ const helmet = require('helmet');
 const path = require('path');
 const appConfig = require('./config/app');
 const authRoutes = require('./routes/authRoutes');
+const productRoutes = require('./routes/productRoutes');
+const categoryRoutes = require('./routes/categoryRoutes');
+const wishlistRoutes = require('./routes/wishlistRoutes');
+const cartRoutes = require('./routes/cartRoutes');
+const orderRoutes = require('./routes/orderRoutes');
+const sellerRoutes = require('./routes/sellerRoutes');
 const { successResponse, errorResponse } = require('./helpers/responseHelper');
 const { toPublicError } = require('./helpers/errorHelper');
 const sanitizeMiddleware = require('./middleware/sanitizeMiddleware');
@@ -44,6 +50,12 @@ app.get('/api/health', (req, res) => {
 });
 
 app.use('/api/auth', authRoutes);
+app.use('/api/products', productRoutes);
+app.use('/api/categories', categoryRoutes);
+app.use('/api/wishlist', wishlistRoutes);
+app.use('/api/cart', cartRoutes);
+app.use('/api/orders', orderRoutes);
+app.use('/api/seller', sellerRoutes);
 
 app.use('/api', (req, res) => {
   return errorResponse(res, 'API route not found.', 404);
