@@ -49,6 +49,8 @@ cd ../frontend && npm install
 
 Create backend and frontend environment files, import `schema.sql` and `seed.sql`, then start both applications:
 
+### Development
+Backend:
 ```bash
 cd backend
 npm run dev
