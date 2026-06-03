@@ -1,0 +1,28 @@
+import { useEffect } from 'react';
+import { Navigate, useLocation } from 'react-router-dom';
+import useAuthStore from '../stores/authStore';
+import useToastStore from '../stores/toastStore';
+
+const ProtectedRoute = ({ children, allowedRoles = [] }) => {
+  const location = useLocation();
+  const { isAuthenticated, user } = useAuthStore();
+  const isWrongRole = isAuthenticated && allowedRoles.length > 0 && !allowedRoles.includes(user?.role_id);
+
+  useEffect(() => {
+    if (isWrongRole) {
+      useToastStore.getState().showToast('You do not have permission to access that page.', 'error');
+    }
+  }, [isWrongRole]);
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  if (isWrongRole) {
+    return <Navigate to="/" replace />;
+  }
+
+  return children;
+};
+
+export default ProtectedRoute;
