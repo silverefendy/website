@@ -12,6 +12,7 @@ import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
 import MyOrdersPage from './pages/customer/MyOrdersPage';
 import ProfilePage from './pages/customer/ProfilePage';
+import WishlistPage from './pages/customer/WishlistPage';
 import SellerDashboardPage from './pages/seller/SellerDashboardPage';
 import MyProductsPage from './pages/seller/MyProductsPage';
 import ProductFormPage from './pages/seller/ProductFormPage';
@@ -39,6 +40,7 @@ const App = () => (
       <Route path="/cart" element={<ProtectedRoute allowedRoles={[3]}><WithLayout><CartPage /></WithLayout></ProtectedRoute>} />
       <Route path="/orders" element={<ProtectedRoute allowedRoles={[3]}><WithLayout><MyOrdersPage /></WithLayout></ProtectedRoute>} />
       <Route path="/profile" element={<ProtectedRoute allowedRoles={[3]}><WithLayout><ProfilePage /></WithLayout></ProtectedRoute>} />
+      <Route path="/wishlist" element={<ProtectedRoute allowedRoles={[3]}><WithLayout><WishlistPage /></WithLayout></ProtectedRoute>} />
       <Route path="/seller" element={<WithSellerLayout><SellerDashboardPage /></WithSellerLayout>} />
       <Route path="/seller/products" element={<WithSellerLayout><MyProductsPage /></WithSellerLayout>} />
       <Route path="/seller/products/add" element={<WithSellerLayout><ProductFormPage /></WithSellerLayout>} />

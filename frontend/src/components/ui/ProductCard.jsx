@@ -30,6 +30,7 @@ const ProductCard = ({ product }) => {
         </div>
         <h3 className="line-clamp-2 min-h-[3rem] font-semibold text-slate-900">{product.name}</h3>
         <p className="text-lg font-bold text-primary-700">{formatPrice(product.price)}</p>
+        {Number(product.stock || 0) === 0 ? <p className="text-sm font-semibold text-red-600">Out of stock</p> : Number(product.stock || 0) <= 5 && <p className="text-sm font-semibold text-amber-600">Low stock: {product.stock} left</p>}
         <p className="truncate text-sm text-slate-500">{product.store_name}</p>
       </div>
     </article>

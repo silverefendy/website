@@ -19,6 +19,7 @@ const ProductDetailPage = () => {
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState('description');
   const [review, setReview] = useState({ rating: 5, comment: '' });
+  const [isWishlisted, setIsWishlisted] = useState(false);
 
   useEffect(() => {
     fetchProduct(slug).catch(() => {});
@@ -33,6 +34,31 @@ const ProductDetailPage = () => {
   useEffect(() => {
     if (images.length > 0) setSelectedImage(images[0]);
   }, [images]);
+
+  useEffect(() => {
+    setIsWishlisted(Boolean(currentProduct?.is_wishlisted));
+  }, [currentProduct?.is_wishlisted]);
+
+  const toggleWishlist = async () => {
+    if (!isAuthenticated || !isCustomer) {
+      useToastStore.getState().showToast('Please login as a customer to use your wishlist.', 'error');
+      return;
+    }
+
+    try {
+      if (isWishlisted) {
+        await api.delete(`/wishlist/${currentProduct.id}`);
+        setIsWishlisted(false);
+        useToastStore.getState().showToast('Removed from wishlist.', 'success');
+      } else {
+        await api.post(`/wishlist/${currentProduct.id}`);
+        setIsWishlisted(true);
+        useToastStore.getState().showToast('Added to wishlist.', 'success');
+      }
+    } catch (error) {
+      useToastStore.getState().showToast(error.response?.data?.message || 'Unable to update wishlist.', 'error');
+    }
+  };
 
   const submitReview = async (event) => {
     event.preventDefault();
@@ -83,7 +109,7 @@ const ProductDetailPage = () => {
             </div>
           </div>
           <p className="text-3xl font-extrabold text-primary-700">{formatPrice(currentProduct.price)}</p>
-          <p className="text-sm text-slate-600">Stock: <span className="font-semibold text-slate-900">{stock}</span></p>
+          <p className="text-sm text-slate-600">Stock: <span className="font-semibold text-slate-900">{stock}</span>{stock > 0 && stock <= 5 && <span className="ml-2 rounded-full bg-amber-50 px-2 py-1 text-xs font-bold text-amber-700">Low stock</span>}{stock === 0 && <span className="ml-2 rounded-full bg-red-50 px-2 py-1 text-xs font-bold text-red-700">Out of stock</span>}</p>
 
           <div className="rounded-2xl border border-slate-200 p-4">
             <p className="text-sm text-slate-500">Sold by</p>
@@ -93,6 +119,7 @@ const ProductDetailPage = () => {
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
             <input type="number" min="1" max={stock || 1} value={quantity} onChange={(event) => setQuantity(Number(event.target.value))} className="w-28 rounded-xl border border-slate-200 px-3 py-3" />
             <button type="button" disabled={!stock} onClick={() => addItem(currentProduct.id, quantity)} className="rounded-xl bg-primary-600 px-6 py-3 font-semibold text-white hover:bg-primary-700 disabled:cursor-not-allowed disabled:opacity-50">Add to Cart</button>
+            <button type="button" onClick={toggleWishlist} className={`rounded-xl border px-6 py-3 font-semibold ${isWishlisted ? 'border-red-200 bg-red-50 text-red-700' : 'border-primary-200 text-primary-700 hover:bg-primary-50'}`}>{isWishlisted ? 'Wishlisted' : 'Add to Wishlist'}</button>
             <a href={buildWhatsAppUrl(`I want to ask about ${currentProduct.name}`)} target="_blank" rel="noreferrer" className="rounded-xl border border-primary-200 px-6 py-3 text-center font-semibold text-primary-700 hover:bg-primary-50">Contact Store</a>
           </div>
         </div>

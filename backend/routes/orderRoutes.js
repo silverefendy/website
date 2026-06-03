@@ -1,0 +1,10 @@
+const express = require('express');
+const authMiddleware = require('../middleware/authMiddleware');
+const { isCustomer } = require('../middleware/roleMiddleware');
+const { createOrder, listOrders, confirmReceipt } = require('../controllers/orderController');
+const router = express.Router();
+router.use(authMiddleware, isCustomer);
+router.get('/', listOrders);
+router.post('/', createOrder);
+router.put('/:orderId/confirm-receipt', confirmReceipt);
+module.exports = router;
