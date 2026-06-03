@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import api from '../../api/axios';
 import { formatPrice } from '../../config/constants';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
@@ -28,13 +29,44 @@ const SellerDashboardPage = () => {
   if (isLoading) return <LoadingSpinner />;
 
   const stats = data.stats || {};
+  const monthlySales = data.monthly_sales || [];
+  const topProducts = data.top_selling_products || [];
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold text-slate-950">Seller Dashboard</h1>
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {[['Total Products', stats.total_products || 0], ['Total Orders', stats.total_orders || 0], ['Pending Orders', stats.pending_orders || 0], ['Total Revenue', formatPrice(stats.total_revenue || 0)]].map(([label, value]) => (
+        {[['Total Products', stats.total_products || 0], ['Total Orders', stats.total_orders || 0], ['Low Stock', stats.low_stock_products || 0], ['Total Sales', formatPrice(stats.total_sales || stats.total_revenue || 0)]].map(([label, value]) => (
           <div key={label} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"><p className="text-sm text-slate-500">{label}</p><p className="mt-2 text-2xl font-bold text-slate-950">{value}</p></div>
         ))}
+      </div>
+      <div className="grid gap-6 xl:grid-cols-2">
+        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <h2 className="font-bold text-slate-950">Monthly Sales</h2>
+          <div className="mt-4 h-72">
+            {monthlySales.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={monthlySales}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="month" />
+                  <YAxis />
+                  <Tooltip formatter={(value) => formatPrice(value)} />
+                  <Bar dataKey="sales" fill="#2563eb" radius={[8, 8, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : <p className="text-sm text-slate-500">No sales data yet.</p>}
+          </div>
+        </section>
+        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <h2 className="font-bold text-slate-950">Top Selling Products</h2>
+          <div className="mt-4 space-y-3">
+            {topProducts.length > 0 ? topProducts.map((product) => (
+              <div key={`${product.product_id}-${product.name}`} className="rounded-xl bg-slate-50 p-3">
+                <div className="flex justify-between gap-3 text-sm"><span className="font-semibold text-slate-900">{product.name}</span><span>{product.quantity_sold} sold</span></div>
+                <p className="mt-1 text-sm font-bold text-primary-700">{formatPrice(product.sales)}</p>
+              </div>
+            )) : <p className="text-sm text-slate-500">No sales yet.</p>}
+          </div>
+        </section>
       </div>
       <section className="rounded-2xl border border-slate-200 bg-white shadow-sm">
         <div className="border-b border-slate-100 p-5"><h2 className="font-bold text-slate-950">Recent Orders</h2></div>
