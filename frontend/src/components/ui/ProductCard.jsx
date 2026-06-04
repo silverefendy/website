@@ -1,10 +1,11 @@
 import { useNavigate } from 'react-router-dom';
-import { DEFAULT_PRODUCT_IMAGE, formatPrice, resolveImageUrl } from '../../config/constants';
+import { formatPrice } from '../../config/constants';
+import SafeImage from './SafeImage';
 import StarRating from './StarRating';
 
 const ProductCard = ({ product }) => {
   const navigate = useNavigate();
-  const imageSrc = resolveImageUrl(product?.primary_image || product?.image_path || product?.image);
+  const imageSrc = product?.primary_image || product?.image_path || product?.image;
 
   return (
     <article
@@ -15,10 +16,9 @@ const ProductCard = ({ product }) => {
       className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:border-primary-200 hover:shadow-lg"
     >
       <div className="aspect-square overflow-hidden bg-slate-100">
-        <img
+        <SafeImage
           src={imageSrc}
           alt={product.name}
-          onError={(event) => { event.currentTarget.src = DEFAULT_PRODUCT_IMAGE; }}
           className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
           loading="lazy"
         />

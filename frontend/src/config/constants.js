@@ -7,9 +7,10 @@ export const SUPPORT_EMAIL = import.meta.env.VITE_SUPPORT_EMAIL || 'support@exam
 export const WHATSAPP_NUMBER = import.meta.env.VITE_WHATSAPP_NUMBER || '6281234567890';
 
 const indonesiaLocale = 'id-ID';
+const isAbsoluteUrl = (value) => /^https?:\/\//i.test(String(value));
 
-export const DEFAULT_PRODUCT_IMAGE = `${API_URL}/uploads/default-product.jpg`;
-export const DEFAULT_AVATAR_IMAGE = `${API_URL}/uploads/default-avatar.png`;
+export const DEFAULT_PRODUCT_IMAGE = '/images/default-product.svg';
+export const DEFAULT_AVATAR_IMAGE = '/images/default-avatar.svg';
 
 export const formatPrice = (amount) => {
   const numericAmount = Number(amount) || 0;
@@ -21,16 +22,18 @@ export const formatPrice = (amount) => {
   return `${CURRENCY_SYMBOL} ${formattedAmount}`;
 };
 
-export const resolveImageUrl = (path) => {
-  if (!path) {
-    return DEFAULT_PRODUCT_IMAGE;
+export const resolveImageUrl = (path, fallback = DEFAULT_PRODUCT_IMAGE) => {
+  const value = String(path || '').trim();
+
+  if (!value) {
+    return fallback;
   }
 
-  if (String(path).startsWith('http')) {
-    return path;
+  if (isAbsoluteUrl(value) || value.startsWith('blob:') || value.startsWith('data:') || value.startsWith('/images/')) {
+    return value;
   }
 
-  return `${API_URL}/${String(path).replace(/^\/+/, '')}`;
+  return `${API_URL}/${value.replace(/^\/+/, '')}`;
 };
 
 export const buildWhatsAppUrl = (message = '') => {

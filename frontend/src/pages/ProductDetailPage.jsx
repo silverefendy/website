@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import api from '../api/axios';
-import { DEFAULT_PRODUCT_IMAGE, buildWhatsAppUrl, formatPrice, resolveImageUrl } from '../config/constants';
+import { buildWhatsAppUrl, formatPrice } from '../config/constants';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import EmptyState from '../components/ui/EmptyState';
 import StarRating from '../components/ui/StarRating';
+import SafeImage from '../components/ui/SafeImage';
 import useAuthStore from '../stores/authStore';
 import useCartStore from '../stores/cartStore';
 import useProductStore from '../stores/productStore';
@@ -83,17 +84,16 @@ const ProductDetailPage = () => {
       <section className="grid gap-8 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm lg:grid-cols-2 lg:p-8">
         <div>
           <div className="aspect-square overflow-hidden rounded-2xl bg-slate-100">
-            <img
-              src={resolveImageUrl(selectedImage)}
+            <SafeImage
+              src={selectedImage}
               alt={currentProduct.name}
-              onError={(event) => { event.currentTarget.src = DEFAULT_PRODUCT_IMAGE; }}
               className="h-full w-full object-cover"
             />
           </div>
           <div className="mt-4 flex gap-3 overflow-x-auto">
             {images.map((image) => (
               <button key={image} type="button" onClick={() => setSelectedImage(image)} className={`h-20 w-20 shrink-0 overflow-hidden rounded-xl border ${selectedImage === image ? 'border-primary-600' : 'border-slate-200'}`}>
-                <img src={resolveImageUrl(image)} alt={`${currentProduct.name} thumbnail`} onError={(event) => { event.currentTarget.src = DEFAULT_PRODUCT_IMAGE; }} className="h-full w-full object-cover" />
+                <SafeImage src={image} alt={`${currentProduct.name} thumbnail`} className="h-full w-full object-cover" />
               </button>
             ))}
           </div>

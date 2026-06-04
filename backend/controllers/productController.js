@@ -1,8 +1,8 @@
 const db = require('../config/db');
-const appConfig = require('../config/app');
 const productRepository = require('../repositories/productRepository');
 const { successResponse, errorResponse } = require('../helpers/responseHelper');
 const { slugify } = require('../helpers/stringHelper');
+const { buildPublicUploadPath } = require('../helpers/uploadHelper');
 
 const listProducts = async (req, res, next) => {
   try {
@@ -36,11 +36,7 @@ const createReview = async (req, res, next) => {
   }
 };
 
-const buildUploadPath = (file) => {
-  if (!file) return null;
-  const publicUploadDir = appConfig.uploadDir.replace(/\\/g, '/').replace(/\/?$/, '/');
-  return `${publicUploadDir}${file.filename}`;
-};
+const buildUploadPath = buildPublicUploadPath;
 
 const resolveSellerStoreId = async (req) => {
   if (req.user.store_id) return req.user.store_id;
