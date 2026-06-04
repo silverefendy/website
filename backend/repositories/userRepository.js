@@ -1,12 +1,12 @@
 const db = require('../config/db');
 
 const publicUserSelect = `users.id, users.name, users.email, users.phone, users.avatar, users.role_id,
-  roles.name AS role, users.is_active, users.email_verified_at, users.created_at, users.updated_at`;
+  roles.name AS role, users.is_active, users.can_become_seller, users.can_become_seller AS canBecomeSeller, users.seller_status, users.seller_status AS sellerStatus, users.email_verified_at, users.created_at, users.updated_at`;
 
 const findByEmail = async (email) => {
   const [users] = await db.execute(
     `SELECT users.id, users.name, users.email, users.password, users.phone, users.avatar,
-            users.role_id, roles.name AS role, users.is_active
+            users.role_id, roles.name AS role, users.is_active, users.can_become_seller, users.can_become_seller AS canBecomeSeller, users.seller_status, users.seller_status AS sellerStatus
      FROM users
      INNER JOIN roles ON roles.id = users.role_id
      WHERE users.email = ?

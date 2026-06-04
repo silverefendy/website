@@ -7,12 +7,13 @@ import useToastStore from '../stores/toastStore';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import EmptyState from '../components/ui/EmptyState';
 import SafeImage from '../components/ui/SafeImage';
+import LocationDropdowns from '../components/ui/LocationDropdowns';
 
 const CartPage = () => {
   const navigate = useNavigate();
   const { items, isLoading, fetchCart, updateItem, removeItem } = useCartStore();
   const [selectedItems, setSelectedItems] = useState([]);
-  const [shipping, setShipping] = useState({ address: '', city: '', province: '', postal_code: '', notes: '' });
+  const [shipping, setShipping] = useState({ address: '', country: 'ID', city: '', province: '', postal_code: '', notes: '' });
 
   useEffect(() => {
     fetchCart().catch(() => {});
@@ -83,10 +84,7 @@ const CartPage = () => {
         <p className="mt-3 text-sm text-slate-500">Shipping cost is calculated after the seller confirms your order.</p>
         <form onSubmit={checkout} className="mt-5 space-y-3">
           <textarea required value={shipping.address} onChange={(event) => setShipping((state) => ({ ...state, address: event.target.value }))} placeholder="Shipping address" className="w-full rounded-xl border px-3 py-2" rows="3" />
-          <div className="grid grid-cols-2 gap-3">
-            <input required value={shipping.city} onChange={(event) => setShipping((state) => ({ ...state, city: event.target.value }))} placeholder="City" className="rounded-xl border px-3 py-2" />
-            <input required value={shipping.province} onChange={(event) => setShipping((state) => ({ ...state, province: event.target.value }))} placeholder="Province" className="rounded-xl border px-3 py-2" />
-          </div>
+          <LocationDropdowns required value={shipping} onChange={(location) => setShipping((state) => ({ ...state, ...location }))} />
           <input required value={shipping.postal_code} onChange={(event) => setShipping((state) => ({ ...state, postal_code: event.target.value }))} placeholder="Postal code" className="w-full rounded-xl border px-3 py-2" />
           <textarea value={shipping.notes} onChange={(event) => setShipping((state) => ({ ...state, notes: event.target.value }))} placeholder="Order notes" className="w-full rounded-xl border px-3 py-2" rows="2" />
           <button type="submit" className="w-full rounded-xl bg-primary-600 px-5 py-3 font-semibold text-white hover:bg-primary-700">Checkout</button>

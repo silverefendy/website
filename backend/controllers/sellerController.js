@@ -4,7 +4,7 @@ const { successResponse, errorResponse } = require('../helpers/responseHelper');
 
 const resolveStoreId = async (req) => {
   if (req.user.store_id) return req.user.store_id;
-  const [stores] = await db.execute('SELECT id FROM stores WHERE user_id = ? LIMIT 1', [req.user.id]);
+  const [stores] = await db.execute('SELECT id FROM stores WHERE user_id = ? AND is_active = TRUE LIMIT 1', [req.user.id]);
   return stores[0]?.id;
 };
 
@@ -13,7 +13,7 @@ const dashboard = async (req, res, next) => {
     const storeId = await resolveStoreId(req);
     if (!storeId) return errorResponse(res, 'Seller store not found.', 404);
 
-    const [[productStats]] = await db.execute('SELECT COUNT(*) AS total_products, SUM(stock <= 5 AND status = \'active\') AS low_stock_products FROM products WHERE store_id = ? AND status <> \'deleted\'', [storeId]);
+    const [[productStats]] = await db.execute('SELECT COUNT(*) AS total_products, SUM(stock <= 5 AND status = \'active\') AS low_stock_products FROM products WHERE store_id = ? AND is_deleted = FALSE', [storeId]);
     const [[orderStats]] = await db.execute('SELECT COUNT(*) AS total_orders, SUM(status = \'pending\') AS pending_orders, COALESCE(SUM(total), 0) AS total_sales, COALESCE(SUM(total), 0) AS total_revenue FROM orders WHERE store_id = ?', [storeId]);
     const [monthlySales] = await db.execute(
       `SELECT DATE_FORMAT(created_at, '%Y-%m') AS month, COALESCE(SUM(total), 0) AS sales, COUNT(*) AS orders

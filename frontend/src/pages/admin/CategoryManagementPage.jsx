@@ -35,8 +35,8 @@ const CategoryManagementPage = () => {
     data.append('description', form.description);
     if (form.image) data.append('image', form.image);
     try {
-      if (form.id) await api.put(`/admin/categories/${form.id}`, data);
-      else await api.post('/admin/categories', data);
+      if (form.id) await api.put(`/categories/${form.id}`, data);
+      else await api.post('/categories', data);
       useToastStore.getState().showToast('Category saved.', 'success');
       setForm(blank);
       load();
@@ -48,7 +48,7 @@ const CategoryManagementPage = () => {
   const remove = async (category) => {
     if (!window.confirm(`Delete category ${category.name}?`)) return;
     try {
-      await api.delete(`/admin/categories/${category.id}`);
+      await api.delete(`/categories/${category.id}`);
       useToastStore.getState().showToast('Category deleted.', 'success');
       load();
     } catch (error) {

@@ -1,4 +1,5 @@
 const bcrypt = require('bcrypt');
+const db = require('../config/db');
 const {
   generateAccessToken,
   generateRefreshToken,
@@ -68,6 +69,16 @@ const register = async (payload, metadata = {}) => {
 
   const role = await roleRepository.findByName(payload.role);
 
+  if (payload.role === 'seller') {
+    const [blocked] = await db.execute(
+      "SELECT id FROM users WHERE email = ? AND (can_become_seller = FALSE OR seller_status = 'disabled') LIMIT 1",
+      [email],
+    );
+    if (blocked.length > 0) {
+      throw new AppError('This account is not eligible to register as a seller.', 403);
+    }
+  }
+
   if (!role) {
     throw new AppError('Selected role is not available.', 400);
   }
@@ -133,6 +144,10 @@ const login = async (payload, metadata = {}) => {
 
   if (!user || !user.is_active) {
     throw new AppError('Invalid email or password.', 401);
+  }
+
+  if (user.role_id === ROLE_IDS.seller && (user.can_become_seller === 0 || user.can_become_seller === false || user.seller_status === 'disabled')) {
+    throw new AppError('Seller account is disabled.', 403);
   }
 
   const isPasswordValid = await bcrypt.compare(payload.password, user.password);

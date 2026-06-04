@@ -1,5 +1,6 @@
 const db = require('../config/db');
 const { successResponse, errorResponse } = require('../helpers/responseHelper');
+const { recordStockMovement } = require('../helpers/stockHelper');
 
 const loadOrders = async (userId) => {
   const [orders] = await db.execute('SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC', [userId]);
@@ -21,7 +22,7 @@ const createOrder = async (req, res, next) => {
     const [items] = await conn.execute(
       `SELECT ci.id, ci.quantity, p.id AS product_id, p.name, p.price, p.stock, p.store_id
        FROM carts c JOIN cart_items ci ON ci.cart_id = c.id JOIN products p ON p.id = ci.product_id
-       WHERE c.user_id = ? AND ci.id IN (${placeholders}) AND p.status = 'active' FOR UPDATE`,
+       WHERE c.user_id = ? AND ci.id IN (${placeholders}) AND p.status = 'active' AND p.is_deleted = FALSE FOR UPDATE`,
       [req.user.id, ...itemIds],
     );
     if (items.length !== itemIds.length) throw Object.assign(new Error('Some cart items are unavailable.'), { statusCode: 409 });
@@ -40,7 +41,18 @@ const createOrder = async (req, res, next) => {
         [req.user.id, storeId, orderNumber, subtotal, subtotal, req.body.shipping_address, req.body.shipping_city, req.body.shipping_province, req.body.shipping_postal_code, req.body.notes || null],
       );
       for (const item of storeItems) {
-        await conn.execute('UPDATE products SET stock = stock - ? WHERE id = ? AND stock >= ?', [item.quantity, item.product_id, item.quantity]);
+        const previousStock = Number(item.stock || 0);
+        const newStock = previousStock - Number(item.quantity || 0);
+        await conn.execute('UPDATE products SET stock = ? WHERE id = ? AND stock >= ?', [newStock, item.product_id, item.quantity]);
+        await recordStockMovement(conn, {
+          productId: item.product_id,
+          userId: req.user.id,
+          movementType: 'OUT',
+          quantity: Number(item.quantity || 0),
+          previousStock,
+          newStock,
+          reason: `Order ${orderNumber}`,
+        });
         await conn.execute('INSERT INTO order_items (order_id, product_id, product_name, product_price, quantity, subtotal) VALUES (?, ?, ?, ?, ?, ?)', [orderResult.insertId, item.product_id, item.name, item.price, item.quantity, Number(item.price) * Number(item.quantity)]);
       }
       orders.push({ id: orderResult.insertId, order_number: orderNumber });

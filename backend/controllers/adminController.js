@@ -58,7 +58,7 @@ const listUsers = async (req, res, next) => {
     const whereSql = where.length ? `WHERE ${where.join(' AND ')}` : '';
     const [[countRow]] = await db.execute(`SELECT COUNT(*) AS total FROM users u JOIN roles r ON r.id = u.role_id ${whereSql}`, params);
     const [users] = await db.execute(
-      `SELECT u.id, u.name, u.email, u.phone, u.avatar, u.role_id, r.name AS role, u.is_active, u.created_at, u.updated_at
+      `SELECT u.id, u.name, u.email, u.phone, u.avatar, u.role_id, r.name AS role, u.is_active, u.can_become_seller, u.can_become_seller AS canBecomeSeller, u.seller_status, u.seller_status AS sellerStatus, u.created_at, u.updated_at
        FROM users u JOIN roles r ON r.id = u.role_id ${whereSql}
        ORDER BY u.created_at DESC LIMIT ? OFFSET ?`,
       [...params, limit, offset],
@@ -75,11 +75,18 @@ const updateUser = async (req, res, next) => {
       if (req.body[field] !== undefined) fields[field] = normalizeNullableText(req.body[field]);
     });
     if (req.body.is_active !== undefined) fields.is_active = Boolean(req.body.is_active);
+    if (req.body.can_become_seller !== undefined) fields.can_become_seller = Boolean(req.body.can_become_seller);
+    if (req.body.seller_status !== undefined) fields.seller_status = req.body.seller_status;
     if (req.body.role_id !== undefined) fields.role_id = Number(req.body.role_id);
 
     const keys = Object.keys(fields);
     if (keys.length === 0) return errorResponse(res, 'No user fields were provided.', 400);
     await db.execute(`UPDATE users SET ${keys.map((key) => `${key} = ?`).join(', ')} WHERE id = ?`, [...Object.values(fields), req.params.userId]);
+    if (fields.seller_status === 'disabled' || fields.can_become_seller === false || fields.is_active === false) {
+      await db.execute('UPDATE stores SET is_active = FALSE WHERE user_id = ?', [req.params.userId]);
+    } else if (fields.seller_status === 'eligible' || fields.can_become_seller === true || fields.is_active === true) {
+      await db.execute("UPDATE stores SET is_active = TRUE WHERE user_id = ? AND EXISTS (SELECT 1 FROM users WHERE id = ? AND is_active = TRUE AND can_become_seller = TRUE AND seller_status = 'eligible')", [req.params.userId, req.params.userId]);
+    }
     return successResponse(res, null, 'User updated successfully.');
   } catch (error) { return next(error); }
 };
