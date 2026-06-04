@@ -1,10 +1,10 @@
-export const API_URL = import.meta.env.VITE_API_URL;
-export const SITE_NAME = import.meta.env.VITE_SITE_NAME;
-export const SITE_TAGLINE = import.meta.env.VITE_SITE_TAGLINE;
-export const CURRENCY = import.meta.env.VITE_CURRENCY;
-export const CURRENCY_SYMBOL = import.meta.env.VITE_CURRENCY_SYMBOL;
-export const SUPPORT_EMAIL = import.meta.env.VITE_SUPPORT_EMAIL;
-export const WHATSAPP_NUMBER = import.meta.env.VITE_WHATSAPP_NUMBER;
+export const API_URL = import.meta.env.VITE_API_URL || '';
+export const SITE_NAME = import.meta.env.VITE_SITE_NAME || 'Marketplace';
+export const SITE_TAGLINE = import.meta.env.VITE_SITE_TAGLINE || 'Multi User Marketplace';
+export const CURRENCY = import.meta.env.VITE_CURRENCY || 'IDR';
+export const CURRENCY_SYMBOL = import.meta.env.VITE_CURRENCY_SYMBOL || 'Rp';
+export const SUPPORT_EMAIL = import.meta.env.VITE_SUPPORT_EMAIL || 'support@example.com';
+export const WHATSAPP_NUMBER = import.meta.env.VITE_WHATSAPP_NUMBER || '6281234567890';
 
 const indonesiaLocale = 'id-ID';
 

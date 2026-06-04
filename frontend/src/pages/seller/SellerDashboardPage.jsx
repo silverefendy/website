@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import api from '../../api/axios';
 import { formatPrice } from '../../config/constants';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';

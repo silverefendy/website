@@ -134,8 +134,9 @@ const upsertReview = async ({ productId, userId, rating, comment }) => {
 
 const listSellerProducts = async (storeId) => {
   const [rows] = await db.execute(
-    `SELECT p.*, pi.image_path AS primary_image FROM products p
-     LEFT JOIN product_images pi ON pi.product_id = p.id AND pi.is_primary = TRUE
+    `SELECT p.*,
+       (SELECT image_path FROM product_images WHERE product_id = p.id ORDER BY is_primary DESC, sort_order ASC, id ASC LIMIT 1) AS primary_image
+     FROM products p
      WHERE p.store_id = ? ORDER BY p.created_at DESC`,
     [storeId],
   );

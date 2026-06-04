@@ -102,6 +102,7 @@ CREATE TABLE IF NOT EXISTS product_images (
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   INDEX idx_product_images_product_id (product_id),
   INDEX idx_product_images_is_primary (is_primary),
+  INDEX idx_product_images_product_primary_sort (product_id, is_primary, sort_order, id),
   CONSTRAINT fk_product_images_product_id FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -178,6 +179,8 @@ CREATE TABLE IF NOT EXISTS orders (
   INDEX idx_orders_store_id (store_id),
   INDEX idx_orders_status (status),
   INDEX idx_orders_created_at (created_at),
+  INDEX idx_orders_store_status_created (store_id, status, created_at),
+  INDEX idx_orders_user_created (user_id, created_at),
   CONSTRAINT fk_orders_user_id FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL ON UPDATE CASCADE,
   CONSTRAINT fk_orders_store_id FOREIGN KEY (store_id) REFERENCES stores(id) ON DELETE SET NULL ON UPDATE CASCADE,
   CONSTRAINT chk_orders_subtotal_non_negative CHECK (subtotal >= 0),
@@ -244,6 +247,7 @@ CREATE TABLE IF NOT EXISTS notifications (
   INDEX idx_notifications_user_id (user_id),
   INDEX idx_notifications_type (type),
   INDEX idx_notifications_is_read (is_read),
+  INDEX idx_notifications_user_read_created (user_id, is_read, created_at),
   INDEX idx_notifications_related (related_type, related_id),
   CONSTRAINT fk_notifications_user_id FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

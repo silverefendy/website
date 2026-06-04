@@ -49,4 +49,36 @@ const products = async (req, res, next) => {
   } catch (error) { return next(error); }
 };
 
-module.exports = { dashboard, products };
+const orders = async (req, res, next) => {
+  try {
+    const storeId = await resolveStoreId(req);
+    if (!storeId) return errorResponse(res, 'Seller store not found.', 404);
+    const params = [storeId];
+    const statusSql = req.query.status ? 'AND o.status = ?' : '';
+    if (req.query.status) params.push(req.query.status);
+    const [rows] = await db.execute(
+      `SELECT o.*, u.name AS customer_name, u.name AS user_name, u.email AS customer_email
+       FROM orders o LEFT JOIN users u ON u.id = o.user_id
+       WHERE o.store_id = ? ${statusSql} ORDER BY o.created_at DESC LIMIT 200`,
+      params,
+    );
+    for (const order of rows) {
+      const [items] = await db.execute('SELECT * FROM order_items WHERE order_id = ?', [order.id]);
+      order.items = items;
+      order.items_count = items.length;
+    }
+    return successResponse(res, { orders: rows }, 'Seller orders retrieved successfully.');
+  } catch (error) { return next(error); }
+};
+
+const updateOrderStatus = async (req, res, next) => {
+  try {
+    const storeId = await resolveStoreId(req);
+    if (!storeId) return errorResponse(res, 'Seller store not found.', 404);
+    const [result] = await db.execute('UPDATE orders SET status = ? WHERE id = ? AND store_id = ?', [req.body.status, req.params.orderId, storeId]);
+    if (result.affectedRows === 0) return errorResponse(res, 'Order not found.', 404);
+    return successResponse(res, null, 'Order status updated successfully.');
+  } catch (error) { return next(error); }
+};
+
+module.exports = { dashboard, products, orders, updateOrderStatus };

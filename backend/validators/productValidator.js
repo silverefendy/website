@@ -2,7 +2,7 @@ const Joi = require('joi');
 
 const productPayload = {
   name: Joi.string().trim().min(2).max(200).required(),
-  slug: Joi.string().trim().max(191),
+  slug: Joi.string().trim().max(191).allow('', null),
   category_id: Joi.number().integer().positive().required(),
   description: Joi.string().trim().min(20).required(),
   price: Joi.number().precision(2).min(0).required(),
@@ -24,7 +24,13 @@ const updateProductSchema = Joi.object({
   weight: productPayload.weight.optional(),
 }).min(1);
 
+const reviewSchema = Joi.object({
+  rating: Joi.number().integer().min(1).max(5).required(),
+  comment: Joi.string().trim().max(5000).allow('', null),
+});
+
 module.exports = {
   createProductSchema,
   updateProductSchema,
+  reviewSchema,
 };
