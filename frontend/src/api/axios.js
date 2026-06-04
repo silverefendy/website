@@ -1,7 +1,15 @@
 import axios from 'axios';
 import { clearAuthSession, getAccessToken, getRefreshToken, setAuthSession } from '../utils/authSession';
 
-const baseURL = `${import.meta.env.VITE_API_URL || ''}/api`;
+if (!import.meta.env.VITE_API_URL) {
+  throw new Error('VITE_API_URL is not defined. Please set backend URL.');
+}
+
+const baseURL = `${import.meta.env.VITE_API_URL}/api`;
+
+if (import.meta.env.DEV) {
+  console.log('API BASE URL:', baseURL);
+}
 
 const api = axios.create({
   baseURL,

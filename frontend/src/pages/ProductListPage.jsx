@@ -30,7 +30,7 @@ const ProductListPage = () => {
         const payload = response.data?.data || response.data || {};
         setCategories(payload.categories || payload.items || []);
       } catch (error) {
-        useToastStore.getState().showToast(error.response?.data?.message || 'Unable to load categories.', 'error');
+        useToastStore.getState().showToast(error.response?.data?.message || 'Unable to load categories. Please confirm the local API is running.', 'error');
       }
     };
     loadCategories();

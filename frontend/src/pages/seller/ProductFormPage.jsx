@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import api from '../../api/axios';
 import { formatPrice } from '../../config/constants';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
+import SafeImage from '../../components/ui/SafeImage';
 import useToastStore from '../../stores/toastStore';
 
 const slugify = (value) => value.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
@@ -89,7 +90,7 @@ const ProductFormPage = () => {
         <label className="block lg:col-span-2"><span className="font-semibold">Description</span><textarea value={form.description} onChange={(event) => update('description', event.target.value)} rows="5" className="mt-2 w-full rounded-xl border px-4 py-3" /></label>
         <div><p className="font-semibold">Condition</p><div className="mt-2 flex gap-4"><label><input type="radio" checked={form.condition === 'new'} onChange={() => update('condition', 'new')} /> New</label><label><input type="radio" checked={form.condition === 'used'} onChange={() => update('condition', 'used')} /> Used</label></div></div>
         <label className="flex items-center gap-3"><input type="checkbox" checked={form.status === 'active'} onChange={(event) => update('status', event.target.checked ? 'active' : 'inactive')} /> Active</label>
-        <div className="lg:col-span-2"><p className="font-semibold">Images</p><input type="file" multiple accept="image/jpeg,image/png,image/webp" onChange={(event) => selectImages(event.target.files)} className="mt-2" /><div className="mt-3 flex flex-wrap gap-3">{images.map((image, index) => <button type="button" key={image.preview} onClick={() => setPrimaryIndex(index)} className={`rounded-xl border p-1 ${primaryIndex === index ? 'border-primary-600' : 'border-slate-200'}`}><img src={image.preview} alt={`Product preview ${index + 1}`} className="h-20 w-20 rounded-lg object-cover" /><span className="text-xs">{primaryIndex === index ? 'Primary' : 'Set primary'}</span></button>)}</div></div>
+        <div className="lg:col-span-2"><p className="font-semibold">Images</p><input type="file" multiple accept="image/jpeg,image/png,image/webp" onChange={(event) => selectImages(event.target.files)} className="mt-2" /><div className="mt-3 flex flex-wrap gap-3">{images.map((image, index) => <button type="button" key={image.preview} onClick={() => setPrimaryIndex(index)} className={`rounded-xl border p-1 ${primaryIndex === index ? 'border-primary-600' : 'border-slate-200'}`}><SafeImage src={image.preview} alt={`Product preview ${index + 1}`} className="h-20 w-20 rounded-lg object-cover" /><span className="text-xs">{primaryIndex === index ? 'Primary' : 'Set primary'}</span></button>)}</div></div>
         <button type="submit" className="rounded-xl bg-primary-600 px-5 py-3 font-semibold text-white lg:col-span-2">Save Product</button>
       </form>
     </section>
