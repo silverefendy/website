@@ -71,6 +71,15 @@ app.use((err, req, res, next) => {
   const message = statusCode === 500 ? 'Internal server error.' : publicError.message;
   const errors = process.env.NODE_ENV === 'development' ? publicError.errors || err.stack : publicError.errors;
 
+  console.error('[api:error]', {
+    method: req.method,
+    path: req.originalUrl,
+    statusCode,
+    code: err.code,
+    message: err.message,
+    stack: err.stack,
+  });
+
   return errorResponse(res, message, statusCode, errors);
 });
 
