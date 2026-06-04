@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
-import { DEFAULT_AVATAR_IMAGE, SITE_NAME, resolveImageUrl } from '../../config/constants';
+import { DEFAULT_AVATAR_IMAGE, SITE_NAME } from '../../config/constants';
 import useAuthStore from '../../stores/authStore';
 import useCartStore from '../../stores/cartStore';
 import useNotificationStore from '../../stores/notificationStore';
+import SafeImage from '../ui/SafeImage';
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -78,10 +79,10 @@ const Navbar = () => {
               </button>
               <div className="relative">
                 <button type="button" onClick={() => setIsUserOpen((value) => !value)} className="flex items-center gap-2 rounded-xl p-1 hover:bg-slate-100">
-                  <img
-                    src={user?.avatar ? resolveImageUrl(user.avatar) : DEFAULT_AVATAR_IMAGE}
+                  <SafeImage
+                    src={user?.avatar}
+                    fallbackSrc={DEFAULT_AVATAR_IMAGE}
                     alt={user?.name || 'User avatar'}
-                    onError={(event) => { event.currentTarget.src = DEFAULT_AVATAR_IMAGE; }}
                     className="h-9 w-9 rounded-full object-cover"
                   />
                   <span className="hidden text-sm font-semibold text-slate-700 sm:block">{user?.name}</span>

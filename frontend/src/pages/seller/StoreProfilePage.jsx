@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { DEFAULT_PRODUCT_IMAGE, resolveImageUrl } from '../../config/constants';
 import useAuthStore from '../../stores/authStore';
+import SafeImage from '../../components/ui/SafeImage';
 
 const StoreProfilePage = () => {
   const { user, fetchMe, updateProfile, isLoading } = useAuthStore();
@@ -40,8 +41,8 @@ const StoreProfilePage = () => {
         <label className="lg:col-span-2"><span className="font-semibold">Store name</span><input required value={form.store_name} onChange={(event) => update('store_name', event.target.value)} className="mt-2 w-full rounded-xl border px-4 py-3" /></label>
         <label className="lg:col-span-2"><span className="font-semibold">Description</span><textarea value={form.description} onChange={(event) => update('description', event.target.value)} rows="4" className="mt-2 w-full rounded-xl border px-4 py-3" /></label>
         {['address', 'city', 'province', 'postal_code'].map((field) => <label key={field}><span className="font-semibold capitalize">{field.replace('_', ' ')}</span><input value={form[field]} onChange={(event) => update(field, event.target.value)} className="mt-2 w-full rounded-xl border px-4 py-3" /></label>)}
-        <div><p className="font-semibold">Logo</p><img src={previews.logo} alt="Store logo preview" className="mt-2 h-24 w-24 rounded-xl object-cover" /><input type="file" accept="image/*" onChange={(event) => setFile('logo', event.target.files?.[0])} className="mt-3" /></div>
-        <div><p className="font-semibold">Banner</p><img src={previews.banner} alt="Store banner preview" className="mt-2 h-24 w-full rounded-xl object-cover" /><input type="file" accept="image/*" onChange={(event) => setFile('banner', event.target.files?.[0])} className="mt-3" /></div>
+        <div><p className="font-semibold">Logo</p><SafeImage src={previews.logo} alt="Store logo preview" className="mt-2 h-24 w-24 rounded-xl object-cover" /><input type="file" accept="image/*" onChange={(event) => setFile('logo', event.target.files?.[0])} className="mt-3" /></div>
+        <div><p className="font-semibold">Banner</p><SafeImage src={previews.banner} alt="Store banner preview" className="mt-2 h-24 w-full rounded-xl object-cover" /><input type="file" accept="image/*" onChange={(event) => setFile('banner', event.target.files?.[0])} className="mt-3" /></div>
         <button disabled={isLoading} type="submit" className="rounded-xl bg-primary-600 px-5 py-3 font-semibold text-white lg:col-span-2">Save Store</button>
       </form>
     </section>

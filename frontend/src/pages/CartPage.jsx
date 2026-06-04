@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
-import { DEFAULT_PRODUCT_IMAGE, buildWhatsAppUrl, formatPrice, resolveImageUrl } from '../config/constants';
+import { buildWhatsAppUrl, formatPrice } from '../config/constants';
 import useCartStore from '../stores/cartStore';
 import useToastStore from '../stores/toastStore';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import EmptyState from '../components/ui/EmptyState';
+import SafeImage from '../components/ui/SafeImage';
 
 const CartPage = () => {
   const navigate = useNavigate();
@@ -64,7 +65,7 @@ const CartPage = () => {
           return (
             <article key={item.id} className="grid gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:grid-cols-[auto_96px_1fr_auto] sm:items-center">
               <input type="checkbox" checked={selectedItems.includes(item.id)} onChange={() => toggleItem(item.id)} className="h-5 w-5 rounded border-slate-300 text-primary-600" />
-              <img src={resolveImageUrl(image)} alt={item.name || item.product?.name} onError={(event) => { event.currentTarget.src = DEFAULT_PRODUCT_IMAGE; }} className="h-24 w-24 rounded-xl object-cover" />
+              <SafeImage src={image} alt={item.name || item.product?.name} className="h-24 w-24 rounded-xl object-cover" />
               <div>
                 <h2 className="font-semibold text-slate-950">{item.name || item.product?.name}</h2>
                 <p className="mt-1 font-bold text-primary-700">{formatPrice(price)}</p>

@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
 const appConfig = require('../config/app');
+const { resolveUploadDirectory } = require('../helpers/uploadHelper');
 
 const uploadDir = appConfig.uploadDir;
 const allowedMimeTypes = new Set(['image/jpeg', 'image/png', 'image/webp']);
@@ -9,7 +10,7 @@ const maxFileSize = appConfig.maxFileSize;
 
 const storage = multer.diskStorage({
   destination(req, file, callback) {
-    const destinationPath = path.resolve(process.cwd(), uploadDir);
+    const destinationPath = resolveUploadDirectory(uploadDir);
     fs.mkdirSync(destinationPath, { recursive: true });
     callback(null, destinationPath);
   },

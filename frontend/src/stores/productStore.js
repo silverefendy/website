@@ -4,7 +4,7 @@ import useToastStore from './toastStore';
 
 const defaultPagination = { page: 1, limit: 12, total: 0, totalPages: 1 };
 const defaultFilters = { category: '', search: '', min_price: '', max_price: '', condition: '', sort: 'newest', page: 1 };
-const messageFrom = (error, fallback) => error.response?.data?.message || error.message || fallback;
+const messageFrom = (error, fallback) => error.response?.data?.message || fallback;
 
 const useProductStore = create((set, get) => ({
   products: [],

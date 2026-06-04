@@ -1,7 +1,6 @@
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
-const path = require('path');
 const appConfig = require('./config/app');
 const authRoutes = require('./routes/authRoutes');
 const productRoutes = require('./routes/productRoutes');
@@ -16,6 +15,7 @@ const { successResponse, errorResponse } = require('./helpers/responseHelper');
 const { toPublicError } = require('./helpers/errorHelper');
 const sanitizeMiddleware = require('./middleware/sanitizeMiddleware');
 const cookieMiddleware = require('./middleware/cookieMiddleware');
+const { resolveUploadDirectory } = require('./helpers/uploadHelper');
 
 const app = express();
 
@@ -27,7 +27,10 @@ const corsOptions = {
     // Browsers send an Origin header for cross-origin frontend calls. The
     // normalized allow-list comes from ALLOWED_ORIGINS plus safe dev defaults.
     // Requests without Origin (curl, health checks, same-origin server calls) are allowed.
-    if (!normalizedOrigin || allowedOrigins.includes(normalizedOrigin)) {
+    const isDevelopmentLocalhost = !appConfig.isProduction
+      && /^https?:\/\/(localhost|127\.0\.0\.1|\[::1\])(?::\d+)?$/.test(normalizedOrigin || '');
+
+    if (!normalizedOrigin || allowedOrigins.includes(normalizedOrigin) || isDevelopmentLocalhost) {
       return callback(null, true);
     }
 
@@ -42,14 +45,16 @@ const corsOptions = {
 
 app.set('trust proxy', 1);
 app.disable('x-powered-by');
-app.use(helmet());
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: 'cross-origin' },
+}));
 app.use(cors(corsOptions));
 app.use(express.json({ limit: process.env.JSON_BODY_LIMIT || '1mb' }));
 app.use(express.urlencoded({ extended: true, limit: process.env.URLENCODED_BODY_LIMIT || '1mb' }));
 app.use(cookieMiddleware);
 app.use(sanitizeMiddleware);
 
-const uploadDirectory = path.resolve(process.cwd(), appConfig.uploadDir || process.env.UPLOAD_DIR || 'uploads/');
+const uploadDirectory = resolveUploadDirectory();
 app.use('/uploads', express.static(uploadDirectory));
 
 app.get('/api/health', (req, res) => {

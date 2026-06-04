@@ -1,5 +1,4 @@
 const bcrypt = require('bcrypt');
-const appConfig = require('../config/app');
 const {
   generateAccessToken,
   generateRefreshToken,
@@ -9,6 +8,7 @@ const {
 } = require('../helpers/jwtHelper');
 const { AppError } = require('../helpers/errorHelper');
 const { normalizeEmail, normalizeNullableText, slugify } = require('../helpers/stringHelper');
+const { buildPublicUploadPath } = require('../helpers/uploadHelper');
 const databaseRepository = require('../repositories/databaseRepository');
 const roleRepository = require('../repositories/roleRepository');
 const userRepository = require('../repositories/userRepository');
@@ -47,15 +47,7 @@ const persistRefreshToken = async (connection, { userId, refreshToken, userAgent
   });
 };
 
-const buildUploadPath = (file) => {
-  if (!file) {
-    return undefined;
-  }
-
-  const configuredUploadDir = appConfig.uploadDir || process.env.UPLOAD_DIR || 'uploads/';
-  const publicUploadDir = configuredUploadDir.replace(/\\/g, '/').replace(/\/?$/, '/');
-  return `${publicUploadDir}${file.filename}`;
-};
+const buildUploadPath = buildPublicUploadPath;
 
 const attachStoreIfSeller = async (user) => {
   if (!user) {
