@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { clearAuthSession, getAccessToken, getRefreshToken, setAuthSession } from '../utils/authSession';
 
-const baseURL = `${import.meta.env.VITE_API_URL}/api`;
+const baseURL = `${import.meta.env.VITE_API_URL || ''}/api`;
 
 const api = axios.create({
   baseURL,
@@ -47,6 +47,7 @@ api.interceptors.response.use(
       originalRequest._retry = true;
       try {
         const token = await refreshAccessToken();
+        originalRequest.headers = originalRequest.headers || {};
         originalRequest.headers.Authorization = `Bearer ${token}`;
         return api(originalRequest);
       } catch (refreshError) {
