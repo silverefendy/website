@@ -2,10 +2,12 @@ import { useEffect } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import useAuthStore from '../stores/authStore';
 import useToastStore from '../stores/toastStore';
+import LoadingSpinner from './ui/LoadingSpinner';
 
 const ProtectedRoute = ({ children, allowedRoles = [] }) => {
   const location = useLocation();
-  const { isAuthenticated, user } = useAuthStore();
+  const { isAuthenticated, isLoading, user } = useAuthStore();
+  const isHydratingSession = isAuthenticated && isLoading && !user;
   const isWrongRole = isAuthenticated && allowedRoles.length > 0 && !allowedRoles.includes(user?.role_id);
 
   useEffect(() => {
@@ -13,6 +15,10 @@ const ProtectedRoute = ({ children, allowedRoles = [] }) => {
       useToastStore.getState().showToast('You do not have permission to access that page.', 'error');
     }
   }, [isWrongRole]);
+
+  if (isHydratingSession) {
+    return <LoadingSpinner />;
+  }
 
   if (!isAuthenticated) {
     return <Navigate to="/login" state={{ from: location }} replace />;

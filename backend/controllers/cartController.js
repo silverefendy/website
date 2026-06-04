@@ -10,9 +10,9 @@ const getOrCreateCartId = async (userId) => {
 
 const loadItems = async (userId) => {
   const [items] = await db.execute(
-    `SELECT ci.id, ci.product_id, ci.quantity, p.name, p.slug, p.price, p.stock, pi.image_path AS primary_image
+    `SELECT ci.id, ci.product_id, ci.quantity, p.name, p.slug, p.price, p.stock,
+       (SELECT image_path FROM product_images WHERE product_id = p.id ORDER BY is_primary DESC, sort_order ASC, id ASC LIMIT 1) AS primary_image
      FROM carts c JOIN cart_items ci ON ci.cart_id = c.id JOIN products p ON p.id = ci.product_id
-     LEFT JOIN product_images pi ON pi.product_id = p.id AND pi.is_primary = TRUE
      WHERE c.user_id = ? ORDER BY ci.updated_at DESC`,
     [userId],
   );

@@ -10,6 +10,8 @@ const wishlistRoutes = require('./routes/wishlistRoutes');
 const cartRoutes = require('./routes/cartRoutes');
 const orderRoutes = require('./routes/orderRoutes');
 const sellerRoutes = require('./routes/sellerRoutes');
+const adminRoutes = require('./routes/adminRoutes');
+const notificationRoutes = require('./routes/notificationRoutes');
 const { successResponse, errorResponse } = require('./helpers/responseHelper');
 const { toPublicError } = require('./helpers/errorHelper');
 const sanitizeMiddleware = require('./middleware/sanitizeMiddleware');
@@ -56,6 +58,8 @@ app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/seller', sellerRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 app.use('/api', (req, res) => {
   return errorResponse(res, 'API route not found.', 404);

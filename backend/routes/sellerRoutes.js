@@ -1,9 +1,13 @@
 const express = require('express');
 const authMiddleware = require('../middleware/authMiddleware');
 const { isSeller } = require('../middleware/roleMiddleware');
-const { dashboard, products } = require('../controllers/sellerController');
+const validate = require('../validators/validateRequest');
+const { updateOrderStatusSchema } = require('../validators/orderValidator');
+const { dashboard, products, orders, updateOrderStatus } = require('../controllers/sellerController');
 const router = express.Router();
 router.use(authMiddleware, isSeller);
 router.get('/dashboard', dashboard);
 router.get('/products', products);
+router.get('/orders', orders);
+router.put('/orders/:orderId/status', validate(updateOrderStatusSchema), updateOrderStatus);
 module.exports = router;

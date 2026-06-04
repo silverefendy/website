@@ -1,10 +1,11 @@
 const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
+const appConfig = require('../config/app');
 
-const uploadDir = process.env.UPLOAD_DIR || 'uploads/';
+const uploadDir = appConfig.uploadDir;
 const allowedMimeTypes = new Set(['image/jpeg', 'image/png', 'image/webp']);
-const maxFileSize = 5 * 1024 * 1024;
+const maxFileSize = appConfig.maxFileSize;
 
 const storage = multer.diskStorage({
   destination(req, file, callback) {
