@@ -1,0 +1,11 @@
+const express = require('express');
+const authMiddleware = require('../middleware/authMiddleware');
+const { listNotifications, markAsRead } = require('../controllers/notificationController');
+
+const router = express.Router();
+
+router.use(authMiddleware);
+router.get('/', listNotifications);
+router.put('/:notificationId/read', markAsRead);
+
+module.exports = router;
