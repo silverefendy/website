@@ -7,6 +7,8 @@ const toNumber = (value, fallback) => {
   return Number.isFinite(parsed) ? parsed : fallback;
 };
 
+const DEVELOPMENT_ALLOWED_ORIGINS = ['http://localhost:3000', 'http://localhost:5173'];
+
 const toOriginList = (value) => {
   if (!value) {
     return [];
@@ -14,9 +16,11 @@ const toOriginList = (value) => {
 
   return value
     .split(',')
-    .map((origin) => origin.trim())
+    .map((origin) => origin.trim().replace(/\/$/, ''))
     .filter(Boolean);
 };
+
+const uniqueOrigins = (origins) => [...new Set(origins)];
 
 const requireEnv = (name, fallback) => {
   const value = process.env[name] ?? fallback;
@@ -39,7 +43,14 @@ const validateProductionSecret = (name, value) => {
 
 const port = toNumber(process.env.PORT, 5000);
 const jwtSecret = requireEnv('JWT_SECRET', isProduction ? undefined : 'development-only-jwt-secret-change-me');
-const allowedOrigins = toOriginList(process.env.ALLOWED_ORIGINS);
+// ALLOWED_ORIGINS is configured as a comma-separated list, for example:
+// ALLOWED_ORIGINS=http://localhost:3000,http://localhost:5173
+// In development we always include the common React/Vite origins so local browsers
+// receive Access-Control-Allow-Origin without weakening the production allow-list.
+const configuredAllowedOrigins = toOriginList(process.env.ALLOWED_ORIGINS);
+const allowedOrigins = isProduction
+  ? configuredAllowedOrigins
+  : uniqueOrigins([...DEVELOPMENT_ALLOWED_ORIGINS, ...configuredAllowedOrigins]);
 
 if (isProduction && allowedOrigins.length === 0) {
   throw new Error('ALLOWED_ORIGINS must include at least one trusted frontend origin in production.');

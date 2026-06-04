@@ -22,7 +22,12 @@ const app = express();
 const corsOptions = {
   origin(origin, callback) {
     const allowedOrigins = appConfig.allowedOrigins || [];
-    if (!origin || allowedOrigins.includes(origin)) {
+    const normalizedOrigin = origin?.replace(/\/$/, '');
+
+    // Browsers send an Origin header for cross-origin frontend calls. The
+    // normalized allow-list comes from ALLOWED_ORIGINS plus safe dev defaults.
+    // Requests without Origin (curl, health checks, same-origin server calls) are allowed.
+    if (!normalizedOrigin || allowedOrigins.includes(normalizedOrigin)) {
       return callback(null, true);
     }
 
