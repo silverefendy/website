@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import api from '../../api/axios';
 import { DEFAULT_AVATAR_IMAGE, resolveImageUrl } from '../../config/constants';
 import useAuthStore from '../../stores/authStore';
+import SafeImage from '../../components/ui/SafeImage';
 import useToastStore from '../../stores/toastStore';
 
 const ProfilePage = () => {
@@ -51,7 +52,7 @@ const ProfilePage = () => {
         <h1 className="text-2xl font-bold text-slate-950">My Profile</h1>
         <form onSubmit={submitProfile} className="mt-6 space-y-4">
           <div className="flex items-center gap-4">
-            <img src={avatarPreview} alt="Profile avatar preview" onError={(event) => { event.currentTarget.src = DEFAULT_AVATAR_IMAGE; }} className="h-20 w-20 rounded-full object-cover" />
+            <SafeImage src={avatarPreview} fallbackSrc={DEFAULT_AVATAR_IMAGE} alt="Profile avatar preview" className="h-20 w-20 rounded-full object-cover" />
             <input type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => selectAvatar(event.target.files?.[0])} className="text-sm" />
           </div>
           <label className="block"><span className="text-sm font-semibold">Name</span><input required value={profile.name} onChange={(event) => setProfile((state) => ({ ...state, name: event.target.value }))} className="mt-2 w-full rounded-xl border px-4 py-3" /></label>

@@ -1,6 +1,7 @@
 const db = require('../config/db');
 const { successResponse, errorResponse } = require('../helpers/responseHelper');
 const { slugify, normalizeNullableText } = require('../helpers/stringHelper');
+const { buildPublicUploadPath } = require('../helpers/uploadHelper');
 
 const toInt = (value, fallback = 1, min = 1, max = 100) => {
   const parsed = Number.parseInt(value, 10);
@@ -8,7 +9,7 @@ const toInt = (value, fallback = 1, min = 1, max = 100) => {
   return Math.min(Math.max(parsed, min), max);
 };
 
-const buildUploadPath = (file) => (file ? `${(process.env.UPLOAD_DIR || 'uploads/').replace(/\\/g, '/').replace(/\/?$/, '/')}${file.filename}` : undefined);
+const buildUploadPath = buildPublicUploadPath;
 
 const dashboard = async (req, res, next) => {
   try {
