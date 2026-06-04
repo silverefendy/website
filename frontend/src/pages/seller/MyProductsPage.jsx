@@ -5,7 +5,6 @@ import { formatPrice } from '../../config/constants';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
 import SafeImage from '../../components/ui/SafeImage';
 import useToastStore from '../../stores/toastStore';
-import SafeImage from '../../components/ui/SafeImage';
 
 const MyProductsPage = () => {
   const navigate = useNavigate();
