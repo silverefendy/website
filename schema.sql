@@ -18,6 +18,8 @@ CREATE TABLE IF NOT EXISTS users (
   avatar VARCHAR(255) NULL,
   role_id INT NOT NULL,
   is_active BOOLEAN NOT NULL DEFAULT TRUE,
+  can_become_seller BOOLEAN NOT NULL DEFAULT TRUE,
+  seller_status ENUM('eligible','disabled') NOT NULL DEFAULT 'eligible',
   email_verified_at TIMESTAMP NULL DEFAULT NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -72,13 +74,17 @@ CREATE TABLE IF NOT EXISTS products (
   stock INT NOT NULL DEFAULT 0,
   weight DECIMAL(8,2) NOT NULL DEFAULT 0.00,
   `condition` ENUM('new','used') NOT NULL DEFAULT 'new',
-  status ENUM('active','inactive','deleted') NOT NULL DEFAULT 'active',
+  status ENUM('active','inactive','draft','archived','deleted') NOT NULL DEFAULT 'draft',
+  weight_unit ENUM('g','kg','lb','pcs','ml','l') NOT NULL DEFAULT 'g',
+  is_deleted BOOLEAN NOT NULL DEFAULT FALSE,
+  deleted_at TIMESTAMP NULL DEFAULT NULL,
   views INT NOT NULL DEFAULT 0,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   INDEX idx_products_store_id (store_id),
   INDEX idx_products_category_id (category_id),
   INDEX idx_products_status (status),
+  INDEX idx_products_is_deleted (is_deleted),
   INDEX idx_products_price (price),
   INDEX idx_products_stock (stock),
   INDEX idx_products_views (views),
@@ -90,6 +96,26 @@ CREATE TABLE IF NOT EXISTS products (
   CONSTRAINT chk_products_stock_non_negative CHECK (stock >= 0),
   CONSTRAINT chk_products_weight_non_negative CHECK (weight >= 0),
   CONSTRAINT chk_products_views_non_negative CHECK (views >= 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS stock_movements (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  product_id INT NOT NULL,
+  user_id INT NULL,
+  movement_type ENUM('IN','OUT','ADJUSTMENT') NOT NULL,
+  quantity INT NOT NULL,
+  previous_stock INT NOT NULL,
+  new_stock INT NOT NULL,
+  reason VARCHAR(255) NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_stock_movements_product_id (product_id),
+  INDEX idx_stock_movements_user_id (user_id),
+  INDEX idx_stock_movements_type (movement_type),
+  CONSTRAINT fk_stock_movements_product_id FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT fk_stock_movements_user_id FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT chk_stock_movements_quantity_non_negative CHECK (quantity >= 0),
+  CONSTRAINT chk_stock_movements_previous_stock_non_negative CHECK (previous_stock >= 0),
+  CONSTRAINT chk_stock_movements_new_stock_non_negative CHECK (new_stock >= 0)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS product_images (

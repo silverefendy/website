@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 import { DEFAULT_PRODUCT_IMAGE, resolveImageUrl } from '../../config/constants';
 import useAuthStore from '../../stores/authStore';
+import SafeImage from '../../components/ui/SafeImage';
+import LocationDropdowns from '../../components/ui/LocationDropdowns';
 
 const StoreProfilePage = () => {
   const { user, fetchMe, updateProfile, isLoading } = useAuthStore();
-  const [form, setForm] = useState({ store_name: '', description: '', address: '', city: '', province: '', postal_code: '' });
+  const [form, setForm] = useState({ store_name: '', description: '', address: '', country: 'ID', city: '', province: '', postal_code: '' });
   const [logo, setLogo] = useState(null);
   const [banner, setBanner] = useState(null);
   const [previews, setPreviews] = useState({ logo: DEFAULT_PRODUCT_IMAGE, banner: DEFAULT_PRODUCT_IMAGE });
@@ -12,7 +14,7 @@ const StoreProfilePage = () => {
   useEffect(() => { fetchMe().catch(() => {}); }, [fetchMe]);
   useEffect(() => {
     const store = user?.store || {};
-    setForm({ store_name: store.store_name || '', description: store.description || '', address: store.address || '', city: store.city || '', province: store.province || '', postal_code: store.postal_code || '' });
+    setForm({ store_name: store.store_name || '', description: store.description || '', address: store.address || '', country: store.country || 'ID', city: store.city || '', province: store.province || '', postal_code: store.postal_code || '' });
     setPreviews({ logo: store.logo ? resolveImageUrl(store.logo) : DEFAULT_PRODUCT_IMAGE, banner: store.banner ? resolveImageUrl(store.banner) : DEFAULT_PRODUCT_IMAGE });
   }, [user]);
 
@@ -39,9 +41,11 @@ const StoreProfilePage = () => {
       <form onSubmit={submit} className="mt-6 grid gap-5 lg:grid-cols-2">
         <label className="lg:col-span-2"><span className="font-semibold">Store name</span><input required value={form.store_name} onChange={(event) => update('store_name', event.target.value)} className="mt-2 w-full rounded-xl border px-4 py-3" /></label>
         <label className="lg:col-span-2"><span className="font-semibold">Description</span><textarea value={form.description} onChange={(event) => update('description', event.target.value)} rows="4" className="mt-2 w-full rounded-xl border px-4 py-3" /></label>
-        {['address', 'city', 'province', 'postal_code'].map((field) => <label key={field}><span className="font-semibold capitalize">{field.replace('_', ' ')}</span><input value={form[field]} onChange={(event) => update(field, event.target.value)} className="mt-2 w-full rounded-xl border px-4 py-3" /></label>)}
-        <div><p className="font-semibold">Logo</p><img src={previews.logo} alt="Store logo preview" className="mt-2 h-24 w-24 rounded-xl object-cover" /><input type="file" accept="image/*" onChange={(event) => setFile('logo', event.target.files?.[0])} className="mt-3" /></div>
-        <div><p className="font-semibold">Banner</p><img src={previews.banner} alt="Store banner preview" className="mt-2 h-24 w-full rounded-xl object-cover" /><input type="file" accept="image/*" onChange={(event) => setFile('banner', event.target.files?.[0])} className="mt-3" /></div>
+        <label className="lg:col-span-2"><span className="font-semibold">Address</span><input value={form.address} onChange={(event) => update('address', event.target.value)} className="mt-2 w-full rounded-xl border px-4 py-3" /></label>
+        <div className="lg:col-span-2"><LocationDropdowns value={form} onChange={(location) => setForm((state) => ({ ...state, ...location }))} /></div>
+        <label><span className="font-semibold">Postal code</span><input value={form.postal_code} onChange={(event) => update('postal_code', event.target.value)} className="mt-2 w-full rounded-xl border px-4 py-3" /></label>
+        <div><p className="font-semibold">Logo</p><SafeImage src={previews.logo} alt="Store logo preview" className="mt-2 h-24 w-24 rounded-xl object-cover" /><input type="file" accept="image/*" onChange={(event) => setFile('logo', event.target.files?.[0])} className="mt-3" /></div>
+        <div><p className="font-semibold">Banner</p><SafeImage src={previews.banner} alt="Store banner preview" className="mt-2 h-24 w-full rounded-xl object-cover" /><input type="file" accept="image/*" onChange={(event) => setFile('banner', event.target.files?.[0])} className="mt-3" /></div>
         <button disabled={isLoading} type="submit" className="rounded-xl bg-primary-600 px-5 py-3 font-semibold text-white lg:col-span-2">Save Store</button>
       </form>
     </section>

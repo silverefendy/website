@@ -6,9 +6,15 @@ import LoadingSpinner from './ui/LoadingSpinner';
 
 const ProtectedRoute = ({ children, allowedRoles = [] }) => {
   const location = useLocation();
-  const { isAuthenticated, isLoading, user } = useAuthStore();
-  const isHydratingSession = isAuthenticated && isLoading && !user;
+  const { isAuthenticated, isLoading, user, fetchMe } = useAuthStore();
+  const isHydratingSession = isAuthenticated && !user;
   const isWrongRole = isAuthenticated && allowedRoles.length > 0 && !allowedRoles.includes(user?.role_id);
+
+  useEffect(() => {
+    if (isAuthenticated && !user && !isLoading) {
+      fetchMe().catch(() => {});
+    }
+  }, [fetchMe, isAuthenticated, isLoading, user]);
 
   useEffect(() => {
     if (isWrongRole) {

@@ -7,7 +7,11 @@ const toNumber = (value, fallback) => {
   return Number.isFinite(parsed) ? parsed : fallback;
 };
 
-const DEVELOPMENT_ALLOWED_ORIGINS = ['http://localhost:3000', 'http://localhost:5173'];
+const DEVELOPMENT_ALLOWED_ORIGINS = [
+  'http://localhost:3000',
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+];
 
 const toOriginList = (value) => {
   if (!value) {

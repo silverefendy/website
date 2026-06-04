@@ -4,6 +4,16 @@ import { SITE_NAME, SITE_TAGLINE } from '../../config/constants';
 import useAuthStore from '../../stores/authStore';
 
 const roleRedirects = { 1: '/admin', 2: '/seller', 3: '/' };
+const customerOnlyPaths = ['/cart', '/orders', '/profile', '/wishlist'];
+const sellerOnlyPaths = ['/seller'];
+const adminOnlyPaths = ['/admin'];
+
+const canAccessPath = (roleId, path = '/') => {
+  if (customerOnlyPaths.some((prefix) => path.startsWith(prefix))) return roleId === 3;
+  if (sellerOnlyPaths.some((prefix) => path.startsWith(prefix))) return roleId === 2;
+  if (adminOnlyPaths.some((prefix) => path.startsWith(prefix))) return roleId === 1;
+  return true;
+};
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -15,7 +25,9 @@ const LoginPage = () => {
   const submit = async (event) => {
     event.preventDefault();
     const data = await login(form);
-    const destination = location.state?.from?.pathname || roleRedirects[data.user?.role_id] || '/';
+    const requestedPath = location.state?.from?.pathname;
+    const roleId = data.user?.role_id;
+    const destination = requestedPath && canAccessPath(roleId, requestedPath) ? requestedPath : roleRedirects[roleId] || '/';
     navigate(destination, { replace: true });
   };
 
@@ -30,7 +42,8 @@ const LoginPage = () => {
           <label className="block"><span className="text-sm font-semibold text-slate-700">Password</span><div className="mt-2 flex rounded-xl border border-slate-200"><input required type={showPassword ? 'text' : 'password'} value={form.password} onChange={(event) => setForm((state) => ({ ...state, password: event.target.value }))} className="min-w-0 flex-1 rounded-l-xl px-4 py-3 outline-none" /><button type="button" onClick={() => setShowPassword((value) => !value)} className="px-4 text-sm font-semibold text-primary-700">{showPassword ? 'Hide' : 'Show'}</button></div></label>
           <button disabled={isLoading} type="submit" className="w-full rounded-xl bg-primary-600 px-5 py-3 font-semibold text-white hover:bg-primary-700 disabled:opacity-60">{isLoading ? 'Logging in...' : 'Login'}</button>
         </form>
-        <p className="mt-6 text-center text-sm text-slate-600">No account? <Link to="/register" className="font-semibold text-primary-700">Register</Link></p>
+        <p className="mt-4 text-center text-sm text-slate-600"><Link to="/" className="font-semibold text-primary-700">Back to homepage</Link></p>
+        <p className="mt-3 text-center text-sm text-slate-600">No account? <Link to="/register" className="font-semibold text-primary-700">Register</Link></p>
       </section>
     </main>
   );

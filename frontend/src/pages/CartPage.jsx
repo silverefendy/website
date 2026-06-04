@@ -1,17 +1,19 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
-import { DEFAULT_PRODUCT_IMAGE, buildWhatsAppUrl, formatPrice, resolveImageUrl } from '../config/constants';
+import { buildWhatsAppUrl, formatPrice } from '../config/constants';
 import useCartStore from '../stores/cartStore';
 import useToastStore from '../stores/toastStore';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import EmptyState from '../components/ui/EmptyState';
+import SafeImage from '../components/ui/SafeImage';
+import LocationDropdowns from '../components/ui/LocationDropdowns';
 
 const CartPage = () => {
   const navigate = useNavigate();
   const { items, isLoading, fetchCart, updateItem, removeItem } = useCartStore();
   const [selectedItems, setSelectedItems] = useState([]);
-  const [shipping, setShipping] = useState({ address: '', city: '', province: '', postal_code: '', notes: '' });
+  const [shipping, setShipping] = useState({ address: '', country: 'ID', city: '', province: '', postal_code: '', notes: '' });
 
   useEffect(() => {
     fetchCart().catch(() => {});
@@ -64,7 +66,7 @@ const CartPage = () => {
           return (
             <article key={item.id} className="grid gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:grid-cols-[auto_96px_1fr_auto] sm:items-center">
               <input type="checkbox" checked={selectedItems.includes(item.id)} onChange={() => toggleItem(item.id)} className="h-5 w-5 rounded border-slate-300 text-primary-600" />
-              <img src={resolveImageUrl(image)} alt={item.name || item.product?.name} onError={(event) => { event.currentTarget.src = DEFAULT_PRODUCT_IMAGE; }} className="h-24 w-24 rounded-xl object-cover" />
+              <SafeImage src={image} alt={item.name || item.product?.name} className="h-24 w-24 rounded-xl object-cover" />
               <div>
                 <h2 className="font-semibold text-slate-950">{item.name || item.product?.name}</h2>
                 <p className="mt-1 font-bold text-primary-700">{formatPrice(price)}</p>
@@ -82,10 +84,7 @@ const CartPage = () => {
         <p className="mt-3 text-sm text-slate-500">Shipping cost is calculated after the seller confirms your order.</p>
         <form onSubmit={checkout} className="mt-5 space-y-3">
           <textarea required value={shipping.address} onChange={(event) => setShipping((state) => ({ ...state, address: event.target.value }))} placeholder="Shipping address" className="w-full rounded-xl border px-3 py-2" rows="3" />
-          <div className="grid grid-cols-2 gap-3">
-            <input required value={shipping.city} onChange={(event) => setShipping((state) => ({ ...state, city: event.target.value }))} placeholder="City" className="rounded-xl border px-3 py-2" />
-            <input required value={shipping.province} onChange={(event) => setShipping((state) => ({ ...state, province: event.target.value }))} placeholder="Province" className="rounded-xl border px-3 py-2" />
-          </div>
+          <LocationDropdowns required value={shipping} onChange={(location) => setShipping((state) => ({ ...state, ...location }))} />
           <input required value={shipping.postal_code} onChange={(event) => setShipping((state) => ({ ...state, postal_code: event.target.value }))} placeholder="Postal code" className="w-full rounded-xl border px-3 py-2" />
           <textarea value={shipping.notes} onChange={(event) => setShipping((state) => ({ ...state, notes: event.target.value }))} placeholder="Order notes" className="w-full rounded-xl border px-3 py-2" rows="2" />
           <button type="submit" className="w-full rounded-xl bg-primary-600 px-5 py-3 font-semibold text-white hover:bg-primary-700">Checkout</button>

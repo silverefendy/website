@@ -56,18 +56,18 @@ ON DUPLICATE KEY UPDATE
   description = VALUES(description),
   parent_id = VALUES(parent_id);
 
-INSERT INTO products (id, store_id, category_id, name, slug, description, price, stock, weight, `condition`, status, views)
+INSERT INTO products (id, store_id, category_id, name, slug, description, price, stock, weight, weight_unit, `condition`, status, views)
 VALUES
-  (1, 1, 6, 'Smartphone Android 128GB', 'smartphone-android-128gb', 'Smartphone Android dengan penyimpanan 128GB untuk kebutuhan komunikasi dan hiburan.', 2500000.00, 15, 350.00, 'new', 'active', 120),
-  (2, 1, 7, 'Earphone Bluetooth Bass Clear', 'earphone-bluetooth-bass-clear', 'Earphone nirkabel dengan kualitas suara jernih dan baterai tahan lama.', 250000.00, 50, 120.00, 'new', 'active', 84),
-  (3, 1, 8, 'Kemeja Pria Casual Oxford', 'kemeja-pria-casual-oxford', 'Kemeja pria bahan oxford nyaman untuk gaya kasual dan semi-formal.', 125000.00, 40, 300.00, 'new', 'active', 76),
-  (4, 1, 9, 'Dress Wanita Midi Floral', 'dress-wanita-midi-floral', 'Dress midi motif floral dengan potongan nyaman untuk aktivitas harian.', 175000.00, 30, 280.00, 'new', 'active', 65),
-  (5, 1, 10, 'Set Pisau Dapur Stainless', 'set-pisau-dapur-stainless', 'Set pisau dapur stainless steel untuk memotong bahan masakan dengan mudah.', 95000.00, 25, 700.00, 'new', 'active', 58),
-  (6, 1, 11, 'Lampu Meja Dekoratif LED', 'lampu-meja-dekoratif-led', 'Lampu meja LED minimalis untuk dekorasi kamar dan ruang kerja.', 85000.00, 35, 550.00, 'new', 'active', 43),
-  (7, 1, 12, 'Matras Yoga Anti Slip', 'matras-yoga-anti-slip', 'Matras yoga anti slip untuk latihan di rumah maupun studio.', 110000.00, 60, 900.00, 'new', 'active', 97),
-  (8, 1, 13, 'Botol Minum Outdoor 1L', 'botol-minum-outdoor-1l', 'Botol minum kapasitas 1 liter untuk olahraga dan kegiatan outdoor.', 45000.00, 100, 250.00, 'new', 'active', 53),
-  (9, 1, 14, 'Serum Wajah Niacinamide', 'serum-wajah-niacinamide', 'Serum wajah dengan kandungan niacinamide untuk perawatan kulit harian.', 75000.00, 45, 100.00, 'new', 'active', 112),
-  (10, 1, 15, 'Lip Cream Matte Natural', 'lip-cream-matte-natural', 'Lip cream matte dengan warna natural dan tekstur ringan.', 25000.00, 80, 60.00, 'new', 'active', 91)
+  (1, 1, 6, 'Smartphone Android 128GB', 'smartphone-android-128gb', 'Smartphone Android dengan penyimpanan 128GB untuk kebutuhan komunikasi dan hiburan.', 2500000.00, 15, 350.00, 'g', 'new', 'active', 120),
+  (2, 1, 7, 'Earphone Bluetooth Bass Clear', 'earphone-bluetooth-bass-clear', 'Earphone nirkabel dengan kualitas suara jernih dan baterai tahan lama.', 250000.00, 50, 120.00, 'g', 'new', 'active', 84),
+  (3, 1, 8, 'Kemeja Pria Casual Oxford', 'kemeja-pria-casual-oxford', 'Kemeja pria bahan oxford nyaman untuk gaya kasual dan semi-formal.', 125000.00, 40, 300.00, 'g', 'new', 'active', 76),
+  (4, 1, 9, 'Dress Wanita Midi Floral', 'dress-wanita-midi-floral', 'Dress midi motif floral dengan potongan nyaman untuk aktivitas harian.', 175000.00, 30, 280.00, 'g', 'new', 'active', 65),
+  (5, 1, 10, 'Set Pisau Dapur Stainless', 'set-pisau-dapur-stainless', 'Set pisau dapur stainless steel untuk memotong bahan masakan dengan mudah.', 95000.00, 25, 700.00, 'g', 'new', 'active', 58),
+  (6, 1, 11, 'Lampu Meja Dekoratif LED', 'lampu-meja-dekoratif-led', 'Lampu meja LED minimalis untuk dekorasi kamar dan ruang kerja.', 85000.00, 35, 550.00, 'g', 'new', 'active', 43),
+  (7, 1, 12, 'Matras Yoga Anti Slip', 'matras-yoga-anti-slip', 'Matras yoga anti slip untuk latihan di rumah maupun studio.', 110000.00, 60, 900.00, 'g', 'new', 'active', 97),
+  (8, 1, 13, 'Botol Minum Outdoor 1L', 'botol-minum-outdoor-1l', 'Botol minum kapasitas 1 liter untuk olahraga dan kegiatan outdoor.', 45000.00, 100, 250.00, 'g', 'new', 'active', 53),
+  (9, 1, 14, 'Serum Wajah Niacinamide', 'serum-wajah-niacinamide', 'Serum wajah dengan kandungan niacinamide untuk perawatan kulit harian.', 75000.00, 45, 100.00, 'g', 'new', 'active', 112),
+  (10, 1, 15, 'Lip Cream Matte Natural', 'lip-cream-matte-natural', 'Lip cream matte dengan warna natural dan tekstur ringan.', 25000.00, 80, 60.00, 'g', 'new', 'active', 91)
 ON DUPLICATE KEY UPDATE
   store_id = VALUES(store_id),
   category_id = VALUES(category_id),
@@ -77,6 +77,7 @@ ON DUPLICATE KEY UPDATE
   price = VALUES(price),
   stock = VALUES(stock),
   weight = VALUES(weight),
+  weight_unit = VALUES(weight_unit),
   `condition` = VALUES(`condition`),
   status = VALUES(status),
   views = VALUES(views);

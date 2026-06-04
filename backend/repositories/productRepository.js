@@ -27,7 +27,7 @@ const baseSelect = `
 `;
 
 const buildProductFilters = (filters = {}, alias = 'p') => {
-  const where = [`${alias}.status = 'active'`];
+  const where = [`${alias}.status = 'active'`, `${alias}.is_deleted = FALSE`, 's.is_active = TRUE'];
   const params = [];
 
   if (filters.search) {
@@ -88,14 +88,14 @@ const list = async (filters = {}) => {
 };
 
 const findById = async (id) => {
-  const [products] = await db.execute('SELECT * FROM products WHERE id = ? LIMIT 1', [id]);
+  const [products] = await db.execute('SELECT * FROM products WHERE id = ? AND is_deleted = FALSE LIMIT 1', [id]);
   return products[0] || null;
 };
 
 const findDetailBySlug = async (slug, userId = null) => {
   const [rows] = await db.execute(
     `${baseSelect}
-     WHERE p.slug = ? AND p.status = 'active'
+     WHERE p.slug = ? AND p.status = 'active' AND p.is_deleted = FALSE AND s.is_active = TRUE
      LIMIT 1`,
     [slug],
   );
@@ -137,7 +137,7 @@ const listSellerProducts = async (storeId) => {
     `SELECT p.*,
        (SELECT image_path FROM product_images WHERE product_id = p.id ORDER BY is_primary DESC, sort_order ASC, id ASC LIMIT 1) AS primary_image
      FROM products p
-     WHERE p.store_id = ? ORDER BY p.created_at DESC`,
+     WHERE p.store_id = ? AND p.is_deleted = FALSE ORDER BY p.created_at DESC`,
     [storeId],
   );
   return rows;
