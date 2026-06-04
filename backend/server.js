@@ -19,21 +19,61 @@ const { resolveUploadDirectory } = require('./helpers/uploadHelper');
 
 const app = express();
 
+const normalizeOrigin = (origin) => origin?.replace(/\/$/, '');
+
+const isDevelopmentOrigin = (origin) => {
+  if (appConfig.isProduction || !origin) {
+    return false;
+  }
+
+  try {
+    const parsedOrigin = new URL(origin);
+    const { hostname, protocol } = parsedOrigin;
+
+    if (!['http:', 'https:'].includes(protocol)) {
+      return false;
+    }
+
+    return hostname === 'localhost'
+      || hostname === '127.0.0.1'
+      || hostname === '::1'
+      || hostname === '[::1]'
+      || /^10\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(hostname)
+      || /^192\.168\.\d{1,3}\.\d{1,3}$/.test(hostname)
+      || /^100\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(hostname);
+  } catch (error) {
+    return false;
+  }
+};
+
+const logCorsDecision = (decision, origin, reason) => {
+  const logger = decision === 'rejected' ? console.warn : console.info;
+  logger(`[cors:${decision}]`, { origin: origin || '(none)', reason });
+};
+
 const corsOptions = {
   origin(origin, callback) {
     const allowedOrigins = appConfig.allowedOrigins || [];
-    const normalizedOrigin = origin?.replace(/\/$/, '');
+    const normalizedOrigin = normalizeOrigin(origin);
 
-    // Browsers send an Origin header for cross-origin frontend calls. The
-    // normalized allow-list comes from ALLOWED_ORIGINS plus safe dev defaults.
-    // Requests without Origin (curl, health checks, same-origin server calls) are allowed.
-    const isDevelopmentLocalhost = !appConfig.isProduction
-      && /^https?:\/\/(localhost|127\.0\.0\.1|\[::1\])(?::\d+)?$/.test(normalizedOrigin || '');
-
-    if (!normalizedOrigin || allowedOrigins.includes(normalizedOrigin) || isDevelopmentLocalhost) {
+    // Requests without Origin (curl, Postman, health checks, same-origin server
+    // calls) are not browser CORS requests and must not be blocked.
+    if (!normalizedOrigin) {
+      logCorsDecision('allowed', normalizedOrigin, 'missing-origin');
       return callback(null, true);
     }
 
+    if (allowedOrigins.includes(normalizedOrigin)) {
+      logCorsDecision('allowed', normalizedOrigin, 'configured-allow-list');
+      return callback(null, true);
+    }
+
+    if (isDevelopmentOrigin(normalizedOrigin)) {
+      logCorsDecision('allowed', normalizedOrigin, 'development-local-or-lan-origin');
+      return callback(null, true);
+    }
+
+    logCorsDecision('rejected', normalizedOrigin, 'not-in-allow-list');
     const error = new Error('Origin is not allowed by CORS.');
     error.statusCode = 403;
     return callback(error);
@@ -95,4 +135,8 @@ app.use((err, req, res, next) => {
 
 app.listen(appConfig.port, () => {
   console.log(`API server is running on port ${appConfig.port}`);
+  console.log('[cors:configured-origins]', appConfig.allowedOrigins);
+  if (!appConfig.isProduction) {
+    console.log('[cors:development-origin-patterns]', ['localhost', '127.0.0.1', '[::1]', '10.*', '192.168.*', '100.*']);
+  }
 });
