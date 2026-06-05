@@ -137,8 +137,8 @@ const deleteProduct = async (req, res, next) => {
     const storeId = await resolveSellerStoreId(req);
     if (!storeId) return errorResponse(res, 'Seller store not found.', 404);
     const [result] = await db.execute(
-      `UPDATE products SET is_deleted = TRUE, deleted_at = CURRENT_TIMESTAMP, status = 'deleted'
-       WHERE id = ? AND store_id = ? AND is_deleted = FALSE`,
+      `UPDATE products SET is_deleted = 1, deleted_at = CURRENT_TIMESTAMP, status = 'deleted'
+       WHERE id = ? AND store_id = ? AND is_deleted = 0`,
       [req.params.id, storeId],
     );
     if (result.affectedRows === 0) return errorResponse(res, 'Product not found.', 404);
@@ -152,7 +152,7 @@ const adjustStock = async (req, res, next) => {
     const storeId = await resolveSellerStoreId(req);
     if (!storeId) return errorResponse(res, 'Seller store not found.', 404);
     await conn.beginTransaction();
-    const [products] = await conn.execute('SELECT id, store_id, stock FROM products WHERE id = ? AND store_id = ? AND is_deleted = FALSE FOR UPDATE', [req.params.id, storeId]);
+    const [products] = await conn.execute('SELECT id, store_id, stock FROM products WHERE id = ? AND store_id = ? AND is_deleted = 0 FOR UPDATE', [req.params.id, storeId]);
     const product = products[0];
     if (!product) throw Object.assign(new Error('Product not found.'), { statusCode: 404 });
     const previousStock = Number(product.stock || 0);

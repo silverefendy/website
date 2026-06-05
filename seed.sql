@@ -9,16 +9,18 @@ ON DUPLICATE KEY UPDATE
   name = VALUES(name),
   description = VALUES(description);
 
-INSERT INTO users (id, name, email, password, phone, avatar, role_id, is_active, email_verified_at)
+INSERT INTO users (id, name, email, password, phone, avatar, role_id, is_active, can_become_seller, seller_status, email_verified_at)
 VALUES
-  (1, 'Admin Utama', 'admin@example.com', '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', NULL, NULL, 1, TRUE, CURRENT_TIMESTAMP),
-  (2, 'Toko Contoh', 'seller@example.com', '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', NULL, NULL, 2, TRUE, CURRENT_TIMESTAMP),
-  (3, 'Pelanggan Demo', 'customer@example.com', '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', NULL, NULL, 3, TRUE, CURRENT_TIMESTAMP)
+  (1, 'Admin Utama', 'admin@example.com', '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', NULL, NULL, 1, TRUE, TRUE, 'eligible', CURRENT_TIMESTAMP),
+  (2, 'Toko Contoh', 'seller@example.com', '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', NULL, NULL, 2, TRUE, TRUE, 'eligible', CURRENT_TIMESTAMP),
+  (3, 'Pelanggan Demo', 'customer@example.com', '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', NULL, NULL, 3, TRUE, TRUE, 'eligible', CURRENT_TIMESTAMP)
 ON DUPLICATE KEY UPDATE
   name = VALUES(name),
   password = VALUES(password),
   role_id = VALUES(role_id),
   is_active = VALUES(is_active),
+  can_become_seller = VALUES(can_become_seller),
+  seller_status = VALUES(seller_status),
   email_verified_at = VALUES(email_verified_at);
 
 INSERT INTO stores (id, user_id, store_name, slug, description, logo, banner, address, city, province, postal_code, is_active)

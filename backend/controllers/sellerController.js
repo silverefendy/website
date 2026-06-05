@@ -13,7 +13,7 @@ const dashboard = async (req, res, next) => {
     const storeId = await resolveStoreId(req);
     if (!storeId) return errorResponse(res, 'Seller store not found.', 404);
 
-    const [[productStats]] = await db.execute('SELECT COUNT(*) AS total_products, SUM(stock <= 5 AND status = \'active\') AS low_stock_products FROM products WHERE store_id = ? AND is_deleted = FALSE', [storeId]);
+    const [[productStats]] = await db.execute('SELECT COUNT(*) AS total_products, SUM(stock <= 5 AND status = \'active\') AS low_stock_products FROM products WHERE store_id = ? AND is_deleted = 0', [storeId]);
     const [[orderStats]] = await db.execute('SELECT COUNT(*) AS total_orders, SUM(status = \'pending\') AS pending_orders, COALESCE(SUM(total), 0) AS total_sales, COALESCE(SUM(total), 0) AS total_revenue FROM orders WHERE store_id = ?', [storeId]);
     const [monthlySales] = await db.execute(
       `SELECT DATE_FORMAT(created_at, '%Y-%m') AS month, COALESCE(SUM(total), 0) AS sales, COUNT(*) AS orders

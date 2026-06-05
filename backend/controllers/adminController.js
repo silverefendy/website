@@ -14,7 +14,7 @@ const buildUploadPath = buildPublicUploadPath;
 const dashboard = async (req, res, next) => {
   try {
     const [[userStats]] = await db.execute('SELECT COUNT(*) AS total_users FROM users');
-    const [[productStats]] = await db.execute('SELECT COUNT(*) AS total_products FROM products WHERE status <> \'deleted\'');
+    const [[productStats]] = await db.execute('SELECT COUNT(*) AS total_products FROM products WHERE is_deleted = 0');
     const [[orderStats]] = await db.execute('SELECT COUNT(*) AS total_orders, SUM(status = \'pending\') AS pending_orders, COALESCE(SUM(total), 0) AS total_sales FROM orders');
     const [ordersPerDay] = await db.execute(
       `SELECT DATE(created_at) AS date, COUNT(*) AS orders

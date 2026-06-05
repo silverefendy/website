@@ -2,10 +2,20 @@ const fs = require('fs/promises');
 const path = require('path');
 const pool = require('../config/db');
 
-const splitStatements = (sql) => sql
+const stripLineComments = (sql) => sql
+  .split(/\r?\n/)
+  .filter((line) => !line.trim().startsWith('--'))
+  .join('\n');
+
+const splitStatements = (sql) => stripLineComments(sql)
   .split(/;\s*(?:\r?\n|$)/)
   .map((statement) => statement.trim())
-  .filter((statement) => statement && !statement.startsWith('--'));
+  .filter(Boolean);
+
+const IGNORED_IDEMPOTENCY_ERRORS = new Set([
+  'ER_DUP_FIELDNAME',
+  'ER_DUP_KEYNAME',
+]);
 
 const run = async () => {
   const migrationFile = process.argv[2];
@@ -21,7 +31,14 @@ const run = async () => {
   const connection = await pool.getConnection();
   try {
     for (const statement of statements) {
-      await connection.query(statement);
+      try {
+        await connection.query(statement);
+      } catch (error) {
+        if (!IGNORED_IDEMPOTENCY_ERRORS.has(error.code)) {
+          throw error;
+        }
+        console.warn(`[migration:skip] ${error.code}: ${error.message}`);
+      }
     }
     console.log(`Migration executed: ${sqlPath}`);
   } finally {
@@ -31,7 +48,7 @@ const run = async () => {
 };
 
 run().catch(async (error) => {
-  console.error(error.message);
+  console.error(error.message || error.code || error);
   await pool.end();
   process.exit(1);
 });
