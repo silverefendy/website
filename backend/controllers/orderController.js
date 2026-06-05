@@ -22,7 +22,7 @@ const createOrder = async (req, res, next) => {
     const [items] = await conn.execute(
       `SELECT ci.id, ci.quantity, p.id AS product_id, p.name, p.price, p.stock, p.store_id
        FROM carts c JOIN cart_items ci ON ci.cart_id = c.id JOIN products p ON p.id = ci.product_id
-       WHERE c.user_id = ? AND ci.id IN (${placeholders}) AND p.status = 'active' AND p.is_deleted = FALSE FOR UPDATE`,
+       WHERE c.user_id = ? AND ci.id IN (${placeholders}) AND p.status = 'active' AND p.is_deleted = 0 FOR UPDATE`,
       [req.user.id, ...itemIds],
     );
     if (items.length !== itemIds.length) throw Object.assign(new Error('Some cart items are unavailable.'), { statusCode: 409 });

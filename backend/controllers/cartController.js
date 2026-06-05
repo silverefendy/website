@@ -13,7 +13,7 @@ const loadItems = async (userId) => {
     `SELECT ci.id, ci.product_id, ci.quantity, p.name, p.slug, p.price, p.stock,
        (SELECT image_path FROM product_images WHERE product_id = p.id ORDER BY is_primary DESC, sort_order ASC, id ASC LIMIT 1) AS primary_image
      FROM carts c JOIN cart_items ci ON ci.cart_id = c.id JOIN products p ON p.id = ci.product_id
-     WHERE c.user_id = ? ORDER BY ci.updated_at DESC`,
+     WHERE c.user_id = ? AND p.status = 'active' AND p.is_deleted = 0 ORDER BY ci.updated_at DESC`,
     [userId],
   );
   return items;
@@ -28,7 +28,7 @@ const addItem = async (req, res, next) => {
   try {
     const quantity = Number(req.body.quantity || 1);
     if (!Number.isInteger(quantity) || quantity < 1) return errorResponse(res, 'Quantity must be positive.', 422);
-    const [products] = await db.execute('SELECT id, stock FROM products WHERE id = ? AND status = \'active\' LIMIT 1', [req.body.product_id]);
+    const [products] = await db.execute('SELECT id, stock FROM products WHERE id = ? AND status = \'active\' AND is_deleted = 0 LIMIT 1', [req.body.product_id]);
     const product = products[0];
     if (!product) return errorResponse(res, 'Product not found.', 404);
     if (product.stock < quantity) return errorResponse(res, 'Not enough stock available.', 409);
@@ -47,7 +47,7 @@ const updateItem = async (req, res, next) => {
     const quantity = Number(req.body.quantity);
     if (!Number.isInteger(quantity) || quantity < 1) return errorResponse(res, 'Quantity must be positive.', 422);
     const [rows] = await db.execute(
-      `SELECT ci.id, p.stock FROM carts c JOIN cart_items ci ON ci.cart_id = c.id JOIN products p ON p.id = ci.product_id WHERE c.user_id = ? AND ci.id = ? LIMIT 1`,
+      `SELECT ci.id, p.stock FROM carts c JOIN cart_items ci ON ci.cart_id = c.id JOIN products p ON p.id = ci.product_id WHERE c.user_id = ? AND ci.id = ? AND p.status = 'active' AND p.is_deleted = 0 LIMIT 1`,
       [req.user.id, req.params.itemId],
     );
     if (!rows.length) return errorResponse(res, 'Cart item not found.', 404);

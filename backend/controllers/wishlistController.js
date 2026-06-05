@@ -12,7 +12,7 @@ const listWishlist = async (req, res, next) => {
        JOIN products p ON p.id = w.product_id
        LEFT JOIN categories c ON c.id = p.category_id
        JOIN stores s ON s.id = p.store_id
-       WHERE w.user_id = ? AND p.status = 'active' AND p.is_deleted = FALSE
+       WHERE w.user_id = ? AND p.status = 'active' AND p.is_deleted = 0
        ORDER BY w.created_at DESC`,
       [req.user.id],
     );
@@ -22,7 +22,7 @@ const listWishlist = async (req, res, next) => {
 
 const addWishlist = async (req, res, next) => {
   try {
-    const [products] = await db.execute("SELECT id FROM products WHERE id = ? AND status = 'active' AND is_deleted = FALSE LIMIT 1", [req.params.productId]);
+    const [products] = await db.execute("SELECT id FROM products WHERE id = ? AND status = 'active' AND is_deleted = 0 LIMIT 1", [req.params.productId]);
     if (!products.length) return errorResponse(res, 'Product not found.', 404);
     await db.execute('INSERT IGNORE INTO wishlists (user_id, product_id) VALUES (?, ?)', [req.user.id, req.params.productId]);
     return successResponse(res, null, 'Product added to wishlist.');

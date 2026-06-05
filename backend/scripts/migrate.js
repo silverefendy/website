@@ -48,7 +48,7 @@ const run = async () => {
 };
 
 run().catch(async (error) => {
-  console.error(error.message);
+  console.error(error.message || error.code || error);
   await pool.end();
   process.exit(1);
 });
